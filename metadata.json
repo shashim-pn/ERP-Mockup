@@ -1,0 +1,6 @@
+{
+  "name": "ProficientNow Enterprise IT CMDB",
+  "description": "ServiceNow Next Experience skin over ERPNext v15 with Slashbucket dual-list column and filter selectors and no-scroll tabbed form view.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
