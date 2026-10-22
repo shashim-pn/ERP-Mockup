@@ -589,44 +589,136 @@
           <button @click="clearAllFilters()" class="text-xs text-slate-400 hover:text-slate-700 underline ml-auto">Clear Filters</button>
         </div>
 
-        <!-- List Table Card -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden">
+        <!-- List Table Card (ServiceNow Record Action Row Pattern) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden relative">
+          
+          <!-- BULK ACTIONS STICKY BAR -->
+          <div x-show="selectedRowIds.length > 0" x-cloak class="sticky top-0 z-20 bg-navy-900 text-white px-3.5 py-2 flex items-center justify-between shadow-md border-b-2 border-navy-700">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-bold text-xs tabular-nums" x-text="selectedRowIds.length + ' selected'"></span>
+              </div>
+              <span class="text-navy-600">|</span>
+              <div class="flex items-center gap-1.5">
+                <button @click="bulkAssign()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="user" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Assign</span>
+                </button>
+                <button @click="bulkExport()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Export</span>
+                </button>
+                <button @click="confirmBulkDelete()" class="px-2.5 py-1 rounded bg-rose-900/40 hover:bg-rose-900/70 border border-rose-700/60 text-rose-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+            <button @click="selectedRowIds = []" class="text-xs text-slate-300 hover:text-white underline font-medium transition-colors">
+              Clear selection
+            </button>
+          </div>
+
           <div class="overflow-x-auto flex-1">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 select-none">
                 <tr>
-                  <th class="p-3 w-8">
+                  <th class="p-2 w-8">
                     <input type="checkbox" @change="toggleSelectAll($event)" :checked="isAllSelected" class="rounded text-navy-700">
                   </th>
                   <template x-for="colKey in selectedDisplayColumns" :key="colKey">
-                    <th class="px-3 py-2.5 font-bold whitespace-nowrap text-slate-700" x-text="getColumnLabel(colKey)"></th>
+                    <th :class="isColumnHiddenOnMobile(colKey) ? 'hidden lg:table-cell' : ''" class="px-2 py-2 text-xs font-medium text-slate-700 whitespace-nowrap" x-text="getColumnLabel(colKey)"></th>
                   </template>
-                  <th class="px-3 py-2.5 font-bold text-center w-16">Age</th>
+                  <th class="px-2 py-2 text-xs font-medium text-slate-700 text-center w-16">Age</th>
+                  <th class="w-10 px-2 py-2 text-right"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <template x-for="record in pagedRecords" :key="record.name">
-                  <tr @click="openRecordForm(record)" class="hover:bg-slate-50/80 cursor-pointer transition-colors group">
-                    <td class="p-3" @click.stop>
+                  <tr class="h-[44px] hover:bg-[#F5F5F5] transition-colors duration-150 group">
+                    <td class="p-2 w-8" @click.stop>
                       <input type="checkbox" :value="record.name" x-model="selectedRowIds" class="rounded text-navy-700">
                     </td>
                     <template x-for="colKey in selectedDisplayColumns" :key="colKey">
-                      <td class="px-3 py-2 whitespace-nowrap">
+                      <td :class="isColumnHiddenOnMobile(colKey) ? 'hidden lg:table-cell' : ''" class="px-2 py-2 whitespace-nowrap">
                         <template x-if="colKey === 'asset_name'">
                           <div class="flex items-center gap-2">
-                            <span class="font-bold text-navy-900 group-hover:underline" x-text="record.asset_name"></span>
+                            <a @click.stop="openRecordForm(record)" class="font-bold text-navy-700 hover:text-navy-900 hover:underline cursor-pointer" x-text="record.asset_name"></a>
                             <span class="text-[10px] text-slate-400 font-mono" x-text="record.name"></span>
+                            <template x-if="record.isFavorite">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-3 h-3 text-rose-500 fill-rose-500 shrink-0 inline-block">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                              </svg>
+                            </template>
                           </div>
                         </template>
                         <template x-if="colKey === 'lifecycle_state'">
-                          <span :class="getStatusPillClass(record.lifecycle_state)" class="px-2 py-0.5 rounded-full text-[10px] font-bold" x-text="record.lifecycle_state"></span>
+                          <span :class="getStatusPillClass(record.lifecycle_state)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                            <template x-if="isWarningOrSeverityStatus(record.lifecycle_state)">
+                              <svg :class="isCriticalSeverityStatus(record.lifecycle_state) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                              </svg>
+                            </template>
+                            <span x-text="record.lifecycle_state"></span>
+                          </span>
                         </template>
-                        <template x-if="colKey !== 'asset_name' && colKey !== 'lifecycle_state'">
+                        <template x-if="colKey === 'compliance'">
+                          <span :class="getStatusPillClass(record.compliance)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                            <template x-if="isWarningOrSeverityStatus(record.compliance)">
+                              <svg :class="isCriticalSeverityStatus(record.compliance) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                              </svg>
+                            </template>
+                            <span x-text="record.compliance"></span>
+                          </span>
+                        </template>
+                        <template x-if="colKey !== 'asset_name' && colKey !== 'lifecycle_state' && colKey !== 'compliance'">
                           <span class="text-slate-600" x-text="record[colKey] || '—'"></span>
                         </template>
                       </td>
                     </template>
-                    <td class="px-3 py-2 text-center text-slate-400" x-text="record.age || '1 w'"></td>
+                    <td class="px-2 py-2 text-center text-slate-400 whitespace-nowrap" x-text="record.age || '1 w'"></td>
+                    <td class="w-10 px-2 py-2 text-right whitespace-nowrap relative" @click.stop>
+                      <!-- Three-dot menu button: always visible on desktop and mobile -->
+                      <button @click.stop="toggleRowMenu(record.name)" class="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 transition-all opacity-100 flex items-center justify-center ml-auto" title="Record actions">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                      </button>
+
+                      <!-- ServiceNow Context Popover -->
+                      <div x-show="activeRowMenuId === record.name" @click.away="activeRowMenuId = null" @keydown.escape.stop="activeRowMenuId = null" x-cloak class="absolute right-2 top-8 w-44 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 text-left select-none">
+                        <button @click.stop="openRecordForm(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center justify-between text-slate-700 hover:text-navy-900 group/item">
+                          <div class="flex items-center gap-2">
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-navy-700"></i>
+                            <span class="font-medium text-xs">Open</span>
+                          </div>
+                          <kbd class="text-[9px] font-mono text-slate-400">Esc</kbd>
+                        </button>
+                        <button @click.stop="duplicateRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Duplicate</span>
+                        </button>
+                        <button @click.stop="assignRecordToMe(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Assign to me</span>
+                        </button>
+                        <button @click.stop="toggleFavoriteRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 transition-colors" :class="record.isFavorite ? 'text-rose-500 fill-rose-500' : 'text-slate-400 fill-none'">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                          </svg>
+                          <span class="font-medium text-xs" x-text="record.isFavorite ? 'Favorited' : 'Add to favorites'"></span>
+                        </button>
+                        <button @click.stop="exportSingleRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Export</span>
+                        </button>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <button @click.stop="confirmDeleteRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-rose-50 flex items-center gap-2 text-rose-600">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                          <span class="font-medium text-xs">Delete</span>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </template>
               </tbody>
@@ -1136,10 +1228,67 @@
         <!-- 3-4 KPI Cards Row -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <template x-for="(kpi, kIdx) in (currentReport?.kpis || [])" :key="kIdx">
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-              <div class="text-[10px] uppercase font-bold text-slate-500" x-text="kpi.label"></div>
-              <div class="text-2xl font-bold text-slate-900 tabular-nums mt-1" x-text="kpi.value"></div>
-              <div class="text-[10px] text-slate-400 mt-0.5" x-text="kpi.change"></div>
+            <div :class="getKpiCardClass(kpi)" class="p-3.5 rounded-xl border border-slate-200 shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 relative overflow-hidden group">
+              <!-- Top Row: Label & Interactive Caution / Warning Sign Badge -->
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider truncate" x-text="kpi.label"></span>
+                
+                <!-- Caution / Warning Sign: Critical & High Severity -->
+                <template x-if="getKpiSignType(kpi) === 'critical'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100/90 text-red-700 text-[10px] font-bold border border-red-200 shadow-2xs shrink-0 select-none cursor-help transition-transform group-hover:scale-105" title="High Severity / Critical condition detected">
+                    <svg class="w-3.5 h-3.5 text-red-600 shrink-0 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+
+                <!-- Caution / Warning Sign: Warning & Attention -->
+                <template x-if="getKpiSignType(kpi) === 'warning'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-100/90 text-amber-800 text-[10px] font-bold border border-amber-200 shadow-2xs shrink-0 select-none cursor-help transition-transform group-hover:scale-105" title="Warning / Attention needed">
+                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+
+                <!-- Normal / Compliant -->
+                <template x-if="getKpiSignType(kpi) === 'good'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100/90 text-emerald-800 text-[10px] font-semibold border border-emerald-200 shadow-2xs shrink-0 select-none" title="Compliant & healthy">
+                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+
+                <!-- Informational / Total -->
+                <template x-if="getKpiSignType(kpi) === 'info'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-100/90 text-blue-800 text-[10px] font-semibold border border-blue-200 shadow-2xs shrink-0 select-none">
+                    <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+              </div>
+
+              <!-- Main Value & Interactive Watermarked Caution Sign Graphic -->
+              <div class="flex items-baseline justify-between mt-1">
+                <div class="text-2xl font-bold text-slate-900 tabular-nums" x-text="kpi.value"></div>
+                <!-- Interactive subtle caution symbol in card background on hover -->
+                <template x-if="['critical', 'warning'].includes(getKpiSignType(kpi))">
+                  <div class="opacity-25 group-hover:opacity-70 transition-opacity">
+                    <svg :class="getKpiSignType(kpi) === 'critical' ? 'text-red-500' : 'text-amber-500'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Change Subtext -->
+              <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1" x-text="kpi.change"></div>
             </div>
           </template>
         </div>
@@ -1154,9 +1303,37 @@
           </div>
         </template>
 
-        <!-- Compact Data Table Card -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden">
+        <!-- Compact Data Table Card (ServiceNow Record Action Row Pattern) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden relative">
           
+          <!-- BULK ACTIONS STICKY BAR FOR REPORTS -->
+          <div x-show="selectedReportRowIds.length > 0" x-cloak class="sticky top-0 z-20 bg-navy-900 text-white px-3.5 py-2 flex items-center justify-between shadow-md border-b-2 border-navy-700">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-bold text-xs tabular-nums" x-text="selectedReportRowIds.length + ' selected'"></span>
+              </div>
+              <span class="text-navy-600">|</span>
+              <div class="flex items-center gap-1.5">
+                <button @click="bulkAssignReport()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="user" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Assign</span>
+                </button>
+                <button @click="bulkExportReport()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Export</span>
+                </button>
+                <button @click="confirmBulkDeleteReport()" class="px-2.5 py-1 rounded bg-rose-900/40 hover:bg-rose-900/70 border border-rose-700/60 text-rose-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+            <button @click="selectedReportRowIds = []" class="text-xs text-slate-300 hover:text-white underline font-medium transition-colors">
+              Clear selection
+            </button>
+          </div>
+
           <!-- Search & Controls Bar -->
           <div class="p-3 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50">
             <div class="relative w-64 max-w-sm">
@@ -1164,7 +1341,7 @@
               <input type="text" x-model="reportSearchQuery" placeholder="Filter rows..." class="w-full pl-8 pr-3 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:ring-1 focus:ring-navy-600">
             </div>
             <div class="text-xs text-slate-500">
-              Click any row to inspect detail drawer &bull; Click headers to sort
+              Click any row name to inspect detail drawer &bull; Click headers to sort
             </div>
           </div>
 
@@ -1173,31 +1350,97 @@
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 select-none">
                 <tr>
+                  <th class="p-2 w-8">
+                    <input type="checkbox" @change="toggleSelectAllReport($event)" :checked="isAllReportSelected" class="rounded text-navy-700">
+                  </th>
                   <template x-for="col in (currentReport?.columns || [])" :key="col.key">
-                    <th @click="col.sortable ? sortReport(col.key) : null" :class="col.sortable ? 'cursor-pointer hover:bg-slate-100' : ''" class="px-3 py-2.5 font-bold whitespace-nowrap text-slate-700">
+                    <th @click="sortReport(col.key)" class="px-2 py-2 text-xs font-medium text-slate-700 whitespace-nowrap cursor-pointer hover:bg-slate-100 select-none">
                       <div class="flex items-center gap-1.5">
                         <span x-text="col.label"></span>
-                        <template x-if="col.sortable && reportSortColumn === col.key">
-                          <span class="text-indigo-600 font-bold" x-text="reportSortAsc ? '↑' : '↓'"></span>
-                        </template>
+                        <span class="text-indigo-600 font-bold" x-text="reportSortColumn === col.key ? (reportSortAsc ? '↑' : '↓') : ''"></span>
                       </div>
                     </th>
                   </template>
+                  <th class="w-10 px-2 py-2 text-right"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                <template x-for="(row, rIdx) in filteredReportRows" :key="rIdx">
-                  <tr @click="openReportRowDetail(row)" class="hover:bg-slate-50/80 cursor-pointer transition-colors">
-                    <template x-for="col in (currentReport?.columns || [])" :key="col.key">
-                      <td class="px-3 py-2 whitespace-nowrap">
-                        <template x-if="col.key === 'status' || col.key === 'state' || col.key === 'risk' || col.key === 'severity'">
-                          <span :class="getStatusPillClass(row[col.key])" class="px-2 py-0.5 rounded-full text-[10px] font-bold" x-text="row[col.key]"></span>
+                <template x-for="(row, rIdx) in filteredReportRows" :key="getReportRowId(row) || rIdx">
+                  <tr @click="openReportRowDetail(row)" class="h-[44px] hover:bg-[#F5F5F5] transition-colors duration-150 cursor-pointer group">
+                    <td class="p-2 w-8" @click.stop>
+                      <input type="checkbox" :value="getReportRowId(row)" x-model="selectedReportRowIds" class="rounded text-navy-700">
+                    </td>
+                    <template x-for="(col, cIdx) in (currentReport?.columns || [])" :key="col.key">
+                      <td class="px-2 py-2 whitespace-nowrap">
+                        <template x-if="cIdx === 0">
+                          <div class="flex items-center gap-1.5">
+                            <a @click.stop="openReportRowDetail(row)" class="font-bold text-navy-700 hover:text-navy-900 hover:underline cursor-pointer" x-text="row[col.key] || '—'"></a>
+                            <template x-if="row.isFavorite">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-3 h-3 text-rose-500 fill-rose-500 shrink-0 inline-block">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                              </svg>
+                            </template>
+                          </div>
                         </template>
-                        <template x-if="col.key !== 'status' && col.key !== 'state' && col.key !== 'risk' && col.key !== 'severity'">
-                          <span :class="col.key.includes('id') || col.key.includes('serial') ? 'font-mono text-navy-900 font-semibold' : 'text-slate-700'" x-text="row[col.key] || '—'"></span>
+                        <template x-if="cIdx !== 0">
+                          <div>
+                            <template x-if="['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(col.key)">
+                              <span :class="getStatusPillClass(row[col.key])" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                                <template x-if="isWarningOrSeverityStatus(row[col.key])">
+                                  <svg :class="isCriticalSeverityStatus(row[col.key]) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                  </svg>
+                                </template>
+                                <span x-text="row[col.key]"></span>
+                              </span>
+                            </template>
+                            <template x-if="!['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(col.key)">
+                              <span :class="col.key.includes('id') || col.key.includes('serial') || col.key.includes('tag') || col.key.includes('upn') ? 'font-mono text-slate-800 font-semibold' : 'text-slate-600'" x-text="row[col.key] || '—'"></span>
+                            </template>
+                          </div>
                         </template>
                       </td>
                     </template>
+                    <td class="w-10 px-2 py-2 text-right whitespace-nowrap relative" @click.stop>
+                      <!-- Three-dot menu button: always visible on desktop and mobile -->
+                      <button @click.stop="toggleReportRowMenu(getReportRowId(row))" class="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 transition-all opacity-100 flex items-center justify-center ml-auto" title="Record actions">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                      </button>
+
+                      <!-- ServiceNow Context Popover for Reports -->
+                      <div x-show="activeReportRowMenuId === getReportRowId(row)" @click.away="activeReportRowMenuId = null" @keydown.escape.stop="activeReportRowMenuId = null" x-cloak class="absolute right-2 top-8 w-44 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 text-left select-none">
+                        <button @click.stop="openReportRowDetail(row); activeReportRowMenuId = null" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center justify-between text-slate-700 hover:text-navy-900 group/item">
+                          <div class="flex items-center gap-2">
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-navy-700"></i>
+                            <span class="font-medium text-xs">Open</span>
+                          </div>
+                          <kbd class="text-[9px] font-mono text-slate-400">Esc</kbd>
+                        </button>
+                        <button @click.stop="duplicateReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Duplicate</span>
+                        </button>
+                        <button @click.stop="assignReportRowToMe(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Assign to me</span>
+                        </button>
+                        <button @click.stop="toggleFavoriteReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 transition-colors" :class="row.isFavorite ? 'text-rose-500 fill-rose-500' : 'text-slate-400 fill-none'">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                          </svg>
+                          <span class="font-medium text-xs" x-text="row.isFavorite ? 'Favorited' : 'Add to favorites'"></span>
+                        </button>
+                        <button @click.stop="exportReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Export</span>
+                        </button>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <button @click.stop="confirmDeleteReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-rose-50 flex items-center gap-2 text-rose-600">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                          <span class="font-medium text-xs">Delete</span>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </template>
               </tbody>
@@ -1379,35 +1622,54 @@
           <div class="p-2.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-[11px] flex items-center justify-between">
             <div class="flex items-center gap-2">
               <i data-lucide="info" class="w-4 h-4 text-indigo-600 shrink-0"></i>
-              <span>Click items to highlight in Indigo, or double-click to transfer immediately. <strong>Asset Name</strong> is locked.</span>
+              <span>Drag &amp; drop to move between lists or reorder columns. Double-click or use &gt; &lt; controls. <strong>Asset Name</strong> is locked.</span>
             </div>
             <button @click="resetColumnsToDefault()" class="text-indigo-700 hover:underline font-bold">Reset Defaults</button>
           </div>
 
           <div class="grid grid-cols-12 gap-2 flex-1 min-h-[360px]">
             <!-- Available Fields -->
-            <div class="col-span-5 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs">
+            <div class="col-span-5 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs transition-all duration-150"
+                 :class="dragOverBucket === 'available' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+                 @dragover.prevent="onDragOverAvailableBucket($event)"
+                 @dragleave="onDragLeaveAvailableBucket($event)"
+                 @drop.prevent="onDropIntoAvailableBucket($event)">
               <div class="font-bold text-slate-800 text-xs mb-1 flex items-center justify-between">
                 <span>Available Fields</span>
                 <span class="font-mono text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded font-bold" x-text="filteredAvailableColumns.length"></span>
               </div>
-              <p class="text-[10px] text-slate-500 mb-1.5">Click to select (or double-click to move)</p>
+              <p class="text-[10px] text-slate-500 mb-1.5">Drag to add or click to select (double-click to move)</p>
               <input type="text" x-model="columnSearchQuery" placeholder="Filter fields..." class="w-full px-2 py-1 mb-2 rounded border border-slate-200 text-xs bg-white">
               <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
                 <template x-for="field in filteredAvailableColumns" :key="field.key">
-                  <div @click="toggleSelectAvailable(field.key)" 
+                  <div draggable="true"
+                       @dragstart="onDragStartAvailable($event, field.key)"
+                       @dragend="onDragEnd()"
+                       @click="toggleSelectAvailable(field.key)" 
                        @dblclick="moveColumnRight(field.key)" 
-                       :class="selectedInAvailable.includes(field.key) 
-                         ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                         : 'bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 text-slate-700'" 
-                       class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                    <div class="flex items-center gap-2">
-                      <div :class="selectedInAvailable.includes(field.key) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                       :class="[
+                         selectedInAvailable.includes(field.key) 
+                           ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                           : 'bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 text-slate-700',
+                         draggedKey === field.key ? 'opacity-30 scale-95 border-dashed border-indigo-400' : ''
+                       ]" 
+                       class="px-2.5 py-1.5 rounded-lg border text-xs cursor-grab active:cursor-grabbing flex items-center justify-between transition-all select-none group/item">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <!-- 6-dot drag grip handle -->
+                      <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="8" cy="6" r="1.5"/>
+                        <circle cx="16" cy="6" r="1.5"/>
+                        <circle cx="8" cy="12" r="1.5"/>
+                        <circle cx="16" cy="12" r="1.5"/>
+                        <circle cx="8" cy="18" r="1.5"/>
+                        <circle cx="16" cy="18" r="1.5"/>
+                      </svg>
+                      <div :class="selectedInAvailable.includes(field.key) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                         <span x-show="selectedInAvailable.includes(field.key)">✓</span>
                       </div>
-                      <span x-text="field.label"></span>
+                      <span class="truncate" x-text="field.label"></span>
                     </div>
-                    <button @click.stop="moveColumnRight(field.key)" :class="selectedInAvailable.includes(field.key) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px]" title="Move right">
+                    <button @click.stop="moveColumnRight(field.key)" :class="selectedInAvailable.includes(field.key) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px] shrink-0" title="Move right">
                       &rarr;
                     </button>
                   </div>
@@ -1425,31 +1687,57 @@
             </div>
 
             <!-- Selected Display Columns -->
-            <div class="col-span-4 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs">
+            <div class="col-span-4 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs transition-all duration-150"
+                 :class="dragOverBucket === 'selected' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+                 @dragover.prevent="onDragOverSelectedBucket($event)"
+                 @dragleave="onDragLeaveSelectedBucket($event)"
+                 @drop.prevent="onDropIntoSelectedBucket($event)">
               <div class="font-bold text-slate-800 text-xs mb-1 flex items-center justify-between">
                 <span>Selected Display Columns</span>
                 <span class="font-mono text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.2 rounded font-bold" x-text="draftSelectedColumns.length"></span>
               </div>
-              <p class="text-[10px] text-slate-500 mb-1.5">Display order (click to select for reordering)</p>
+              <p class="text-[10px] text-slate-500 mb-1.5">Drag to reorder or drop from available</p>
               <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
                 <template x-for="(colKey, index) in draftSelectedColumns" :key="colKey">
-                  <div @click="toggleSelectChosen(colKey)" 
+                  <div :draggable="colKey !== 'asset_name'"
+                       @dragstart="onDragStartSelected($event, colKey, index)"
+                       @dragover.prevent="onDragOverColumnItem($event, index)"
+                       @dragleave="onDragLeaveColumnItem(index)"
+                       @drop.prevent.stop="onDropOnColumnItem($event, index)"
+                       @dragend="onDragEnd()"
+                       @click="toggleSelectChosen(colKey)" 
                        @dblclick="colKey !== 'asset_name' ? moveColumnLeft(colKey) : null" 
-                       :class="selectedInChosen.includes(colKey) 
-                         ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                         : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'" 
-                       class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                    <div class="flex items-center gap-2 truncate">
-                      <div :class="selectedInChosen.includes(colKey) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                       :class="[
+                         selectedInChosen.includes(colKey) 
+                           ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                           : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800',
+                         draggedKey === colKey ? 'opacity-30 scale-95 border-dashed border-indigo-400' : '',
+                         dragOverTargetIndex === index && draggedKey !== colKey ? 'border-t-2 border-t-indigo-600 bg-indigo-50/80 shadow-xs' : ''
+                       ]" 
+                       class="px-2.5 py-1.5 rounded-lg border text-xs flex items-center justify-between transition-all select-none group/item"
+                       :class="colKey !== 'asset_name' ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <template x-if="colKey !== 'asset_name'">
+                        <!-- 6-dot drag grip handle -->
+                        <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="8" cy="6" r="1.5"/>
+                          <circle cx="16" cy="6" r="1.5"/>
+                          <circle cx="8" cy="12" r="1.5"/>
+                          <circle cx="16" cy="12" r="1.5"/>
+                          <circle cx="8" cy="18" r="1.5"/>
+                          <circle cx="16" cy="18" r="1.5"/>
+                        </svg>
+                      </template>
+                      <div :class="selectedInChosen.includes(colKey) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                         <span x-text="selectedInChosen.includes(colKey) ? '✓' : (index + 1)"></span>
                       </div>
-                      <span x-text="getColumnLabel(colKey)"></span>
+                      <span class="truncate" x-text="getColumnLabel(colKey)"></span>
                     </div>
                     <template x-if="colKey === 'asset_name'">
-                      <span class="text-[9px] px-1 py-0.2 rounded bg-slate-200 text-slate-700 font-bold">🔒 Locked</span>
+                      <span class="text-[9px] px-1 py-0.2 rounded bg-slate-200 text-slate-700 font-bold shrink-0">🔒 Locked</span>
                     </template>
                     <template x-if="colKey !== 'asset_name'">
-                      <button @click.stop="moveColumnLeft(colKey)" :class="selectedInChosen.includes(colKey) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px]" title="Remove">
+                      <button @click.stop="moveColumnLeft(colKey)" :class="selectedInChosen.includes(colKey) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px] shrink-0" title="Remove">
                         ✕
                       </button>
                     </template>
@@ -1506,27 +1794,40 @@
 
       <div class="p-4 grid grid-cols-12 gap-2">
         <!-- Left: Available Values -->
-        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs">
+        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs transition-colors"
+             :class="dragOverBucket === 'filter-available' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+             @dragover.prevent="dragOverBucket = 'filter-available'"
+             @dragleave="if (dragOverBucket === 'filter-available') dragOverBucket = null"
+             @drop.prevent="onDropIntoFilterAvailable($event)">
           <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-200">
             <span class="font-bold text-xs text-slate-800">Available Values</span>
             <span class="font-mono text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded font-bold" x-text="filterModalAvailable.length"></span>
           </div>
-          <p class="text-[10px] text-slate-500 mb-1.5">Click to select (or double-click to move)</p>
+          <p class="text-[10px] text-slate-500 mb-1.5">Drag to add (or double-click to move)</p>
           <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
             <template x-for="val in filterModalAvailable" :key="val">
-              <div @click="toggleSelectFilterAvailable(val)" 
+              <div draggable="true"
+                   @dragstart="onDragStartFilterAvailable($event, val)"
+                   @dragend="onDragEnd()"
+                   @click="toggleSelectFilterAvailable(val)" 
                    @dblclick="moveFilterValueRight(val)" 
-                   :class="filterModalSelectedAvail.includes(val) 
-                     ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                     : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50'" 
-                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                <div class="flex items-center gap-2">
-                  <div :class="filterModalSelectedAvail.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                   :class="[
+                     filterModalSelectedAvail.includes(val) 
+                       ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                       : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50',
+                     draggedKey === val ? 'opacity-30 scale-95 border-dashed border-indigo-400' : ''
+                   ]" 
+                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-grab active:cursor-grabbing flex items-center justify-between transition-all select-none group/item">
+                <div class="flex items-center gap-1.5 truncate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/>
+                  </svg>
+                  <div :class="filterModalSelectedAvail.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                     <span x-show="filterModalSelectedAvail.includes(val)">✓</span>
                   </div>
-                  <span x-text="val"></span>
+                  <span class="truncate" x-text="val"></span>
                 </div>
-                <button @click.stop="moveFilterValueRight(val)" :class="filterModalSelectedAvail.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px]" title="Move to Selected">
+                <button @click.stop="moveFilterValueRight(val)" :class="filterModalSelectedAvail.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px] shrink-0" title="Move to Selected">
                   &rarr;
                 </button>
               </div>
@@ -1541,27 +1842,40 @@
         </div>
 
         <!-- Right: Selected Values -->
-        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs">
+        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs transition-colors"
+             :class="dragOverBucket === 'filter-selected' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+             @dragover.prevent="dragOverBucket = 'filter-selected'"
+             @dragleave="if (dragOverBucket === 'filter-selected') dragOverBucket = null"
+             @drop.prevent="onDropIntoFilterSelected($event)">
           <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-200">
             <span class="font-bold text-xs text-slate-800">Selected Values</span>
             <span class="font-mono text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.2 rounded font-bold" x-text="filterModalSelectedDraft.length"></span>
           </div>
-          <p class="text-[10px] text-slate-500 mb-1.5">Values actively filtering table</p>
+          <p class="text-[10px] text-slate-500 mb-1.5">Drag to remove or reorder</p>
           <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
-            <template x-for="val in filterModalSelectedDraft" :key="val">
-              <div @click="toggleSelectFilterChosen(val)" 
+            <template x-for="(val, fIdx) in filterModalSelectedDraft" :key="val">
+              <div draggable="true"
+                   @dragstart="onDragStartFilterSelected($event, val, fIdx)"
+                   @dragend="onDragEnd()"
+                   @click="toggleSelectFilterChosen(val)" 
                    @dblclick="moveFilterValueLeft(val)" 
-                   :class="filterModalSelectedChosen.includes(val) 
-                     ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                     : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'" 
-                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                <div class="flex items-center gap-2">
-                  <div :class="filterModalSelectedChosen.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                   :class="[
+                     filterModalSelectedChosen.includes(val) 
+                       ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                       : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300',
+                     draggedKey === val ? 'opacity-30 scale-95 border-dashed border-indigo-400' : ''
+                   ]" 
+                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-grab active:cursor-grabbing flex items-center justify-between transition-all select-none group/item">
+                <div class="flex items-center gap-1.5 truncate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/>
+                  </svg>
+                  <div :class="filterModalSelectedChosen.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                     <span x-show="filterModalSelectedChosen.includes(val)">✓</span>
                   </div>
-                  <span x-text="val"></span>
+                  <span class="truncate" x-text="val"></span>
                 </div>
-                <button @click.stop="moveFilterValueLeft(val)" :class="filterModalSelectedChosen.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px]" title="Remove value">
+                <button @click.stop="moveFilterValueLeft(val)" :class="filterModalSelectedChosen.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px] shrink-0" title="Remove value">
                   ✕
                 </button>
               </div>
@@ -1612,9 +1926,21 @@
 
               <div class="border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
                 <template x-for="(val, key) in selectedReportRow" :key="key">
-                  <div class="p-2.5 flex items-start justify-between text-xs">
+                  <div class="p-2.5 flex items-center justify-between text-xs">
                     <span class="font-semibold text-slate-500 uppercase text-[10px] tracking-wide" x-text="key.replace('_', ' ')"></span>
-                    <span class="font-mono text-slate-900 text-right max-w-[220px] break-words" x-text="val"></span>
+                    <template x-if="['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(key)">
+                      <span :class="getStatusPillClass(val)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                        <template x-if="isWarningOrSeverityStatus(val)">
+                          <svg :class="isCriticalSeverityStatus(val) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                          </svg>
+                        </template>
+                        <span x-text="val"></span>
+                      </span>
+                    </template>
+                    <template x-if="!['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(key)">
+                      <span class="font-mono text-slate-900 text-right max-w-[220px] break-words" x-text="val"></span>
+                    </template>
                   </div>
                 </template>
               </div>
@@ -1661,6 +1987,30 @@
         </button>
         <button @click="comingSoonModalOpen = false; setView('it-dashboard')" class="px-4 py-2 rounded-lg bg-navy-700 hover:bg-navy-800 text-white font-bold text-xs shadow-xs">
           Open IT Workspace &rarr;
+        </button>
+      </div>
+    </div>
+  <!-- DELETE CONFIRMATION MODAL -->
+  <div x-show="deleteModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="deleteModalOpen = false">
+    <div class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs" @click="deleteModalOpen = false"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl border border-slate-200 max-w-sm w-full p-5 text-left z-10 space-y-3">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm text-slate-900">Are you sure you want to delete this record?</h3>
+          <p class="text-xs text-slate-500 mt-0.5" x-text="deleteIsBulk ? 'You are about to permanently delete ' + (deleteModalType === 'it-asset' ? selectedRowIds.length : selectedReportRowIds.length) + ' selected records.' : 'This action cannot be undone.'"></p>
+        </div>
+      </div>
+      <div class="p-2.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-mono truncate" x-text="getDeleteSummaryText()"></div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button @click="deleteModalOpen = false" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs">
+          Cancel
+        </button>
+        <button @click="executeDelete()" class="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Confirm</span>
         </button>
       </div>
     </div>
@@ -1721,7 +2071,7 @@
 
   <!-- ALPINE JS LOGIC -->
   <script>
-    const reportConfigsData = {"asset-events":{"title":"Asset Events","docType":"IT Asset Event","description":"Complete audit trail of lifecycle movements, reassignments, repairs, and checkouts.","kpis":[{"label":"Total Events","value":"142","change":"+12 this week"},{"label":"Custody Transfers","value":"28","change":"8 pending sign-off"},{"label":"Repairs Logged","value":"14","change":"4 in progress"},{"label":"Auto-Logged (Sync)","value":"118","change":"98.5% confidence"}],"columns":[{"key":"id","label":"Event ID","sortable":true},{"key":"asset_id","label":"Asset ID","sortable":true},{"key":"asset_name","label":"Asset Name","sortable":true},{"key":"event_type","label":"Event Type","sortable":true},{"key":"initiated_by","label":"Initiated By","sortable":true},{"key":"timestamp","label":"Timestamp","sortable":true},{"key":"details","label":"Event Details","sortable":false},{"key":"status","label":"Status","sortable":true}],"rows":[{"id":"EVT-2024-0891","asset_id":"ITA-00605","asset_name":"Lenovo ThinkPad X1 Carbon Gen 11","event_type":"Transfer","initiated_by":"Syed Hashim","timestamp":"2024-10-21 09:15","details":"Assigned to Ananya Roy (Design Dept)","status":"Completed"},{"id":"EVT-2024-0890","asset_id":"ITA-00606","asset_name":"Dell Latitude 5440 Core i7","event_type":"Audit Verified","initiated_by":"Ananya Roy","timestamp":"2024-10-20 14:30","details":"Physical barcode scanned in Block B","status":"Verified"},{"id":"EVT-2024-0889","asset_id":"ITA-00607","asset_name":"Apple MacBook Pro 16\" M3 Max","event_type":"Repair Requested","initiated_by":"Vikram Sethi","timestamp":"2024-10-19 11:20","details":"Trackpad responsiveness diagnostic","status":"In Repair"},{"id":"EVT-2024-0888","asset_id":"ITA-00601","asset_name":"Dell wireless mouse 04WJ8P","event_type":"Check-out","initiated_by":"Tajammul Farooq","timestamp":"2024-10-18 16:45","details":"Issued to Workstation B-12","status":"Completed"},{"id":"EVT-2024-0887","asset_id":"ITA-00608","asset_name":"Dell PowerEdge R750xs Server","event_type":"IP Reassigned","initiated_by":"System (GLPI)","timestamp":"2024-10-18 03:00","details":"Primary IP bound to 10.142.12.108","status":"Completed"},{"id":"EVT-2024-0886","asset_id":"ITA-00602","asset_name":"Dell wired keyboard KB216","event_type":"Location Move","initiated_by":"Syed Hashim","timestamp":"2024-10-17 10:10","details":"Transferred from Storage to Block A","status":"Completed"},{"id":"EVT-2024-0885","asset_id":"ITA-00609","asset_name":"HP Elite Dragonfly G4","event_type":"Commissioned","initiated_by":"Syed Hashim","timestamp":"2024-10-16 12:00","details":"Purchased via PO-2024-0091","status":"Active"},{"id":"EVT-2024-0884","asset_id":"ITA-00610","asset_name":"Cisco Catalyst 9300 48-Port","event_type":"Firmware Update","initiated_by":"Rahul Verma","timestamp":"2024-10-15 22:30","details":"Upgraded to Cisco IOS XE 17.9.4a","status":"Completed"},{"id":"EVT-2024-0883","asset_id":"ITA-00611","asset_name":"Epson WorkForce Pro WF-C5790","event_type":"Maintenance","initiated_by":"Vendor Support","timestamp":"2024-10-14 15:40","details":"Roller kit replacement complete","status":"Completed"},{"id":"EVT-2024-0882","asset_id":"ITA-00612","asset_name":"Dell UltraSharp 27\" U2723QE","event_type":"Transfer","initiated_by":"Pooja Nair","timestamp":"2024-10-13 11:05","details":"Assigned to Dev Lab 4","status":"Completed"},{"id":"EVT-2024-0881","asset_id":"ITA-00613","asset_name":"Lenovo ThinkCentre M70q Tiny","event_type":"Decommissioned","initiated_by":"Syed Hashim","timestamp":"2024-10-12 17:00","details":"End of lifecycle write-off","status":"Retired"},{"id":"EVT-2024-0880","asset_id":"ITA-00614","asset_name":"APC Smart-UPS 3000VA LCD","event_type":"Battery Check","initiated_by":"Ananya Roy","timestamp":"2024-10-11 13:20","details":"Health rating 94% nominal","status":"Verified"}]},"warranty-expiring":{"title":"Warranty Expiring","description":"Hardware equipment with manufacturer or OEM warranty terminating within 90 days.","kpis":[{"label":"Expiring in 30 Days","value":"8","change":"Critical attention"},{"label":"Expiring in 60-90 Days","value":"16","change":"Quote requests sent"},{"label":"Total Replacement Value","value":"₹18.4L","change":"Budget impact"},{"label":"Vendor Renewals Active","value":"4","change":"Dell & AppleCare"}],"columns":[{"key":"id","label":"Asset ID","sortable":true},{"key":"asset_name","label":"Asset Name","sortable":true},{"key":"mfg","label":"Manufacturer","sortable":true},{"key":"serial","label":"Serial No","sortable":true},{"key":"warranty_end","label":"Warranty End","sortable":true},{"key":"days_left","label":"Days Left","sortable":true},{"key":"vendor","label":"Support Vendor","sortable":true},{"key":"status","label":"Action Status","sortable":true}],"rows":[{"id":"ITA-00512","asset_name":"Dell Latitude 7420 Core i7","mfg":"Dell","serial":"SN-DEL-992101","warranty_end":"2024-11-04","days_left":"14 days","vendor":"Dell ProSupport","status":"Renewal Pending"},{"id":"ITA-00518","asset_name":"Lenovo ThinkPad T14 Gen 2","mfg":"Lenovo","serial":"SN-LEN-881240","warranty_end":"2024-11-10","days_left":"20 days","vendor":"Lenovo Premier","status":"Quote Received"},{"id":"ITA-00522","asset_name":"Dell PowerEdge R640 Server","mfg":"Dell","serial":"SN-DEL-771923","warranty_end":"2024-11-15","days_left":"25 days","vendor":"SBM Computers","status":"Urgent Review"},{"id":"ITA-00531","asset_name":"Apple MacBook Air 13\" M1","mfg":"Apple","serial":"SN-APP-662301","warranty_end":"2024-11-22","days_left":"32 days","vendor":"AppleCare Enterprise","status":"Renewal Pending"},{"id":"ITA-00540","asset_name":"HP LaserJet Enterprise M507","mfg":"HP","serial":"SN-HP-551982","warranty_end":"2024-11-28","days_left":"38 days","vendor":"HP Care Pack","status":"Under Review"},{"id":"ITA-00544","asset_name":"Cisco Catalyst 2960-X Switch","mfg":"Cisco","serial":"SN-CIS-441029","warranty_end":"2024-12-05","days_left":"45 days","vendor":"Cisco SMARTnet","status":"Quote Received"},{"id":"ITA-00551","asset_name":"Dell UltraSharp 34\" Curved","mfg":"Dell","serial":"SN-DEL-339102","warranty_end":"2024-12-12","days_left":"52 days","vendor":"Dell ProSupport","status":"Renewal Pending"},{"id":"ITA-00560","asset_name":"Fortinet FortiGate 100F Firewall","mfg":"Fortinet","serial":"SN-FOR-228190","warranty_end":"2024-12-20","days_left":"60 days","vendor":"FortiCare 24x7","status":"Scheduled"},{"id":"ITA-00568","asset_name":"Synology RackStation RS2423+","mfg":"Synology","serial":"SN-SYN-110293","warranty_end":"2025-01-08","days_left":"79 days","vendor":"Synology Extended","status":"Monitoring"},{"id":"ITA-00572","asset_name":"Polycom RealPresence Group 500","mfg":"Poly","serial":"SN-POL-990182","warranty_end":"2025-01-19","days_left":"90 days","vendor":"Polycom Advantage","status":"Monitoring"}]},"physical-audit-due":{"title":"Physical Audit Due","description":"Hardware assets requiring physical verification, barcode scan, and location reconciliation.","kpis":[{"label":"Audits Overdue","value":"24","change":"Requires field check"},{"label":"Due This Month","value":"38","change":"Scheduled cycles"},{"label":"Audited YTD","value":"312","change":"88.4% on-target"},{"label":"Reconciliation Rate","value":"96.2%","change":"Minimal variances"}],"columns":[{"key":"id","label":"Asset ID","sortable":true},{"key":"name","label":"Asset Title","sortable":true},{"key":"location","label":"Expected Location","sortable":true},{"key":"custodian","label":"Assigned Custodian","sortable":true},{"key":"last_audited","label":"Last Audited","sortable":true},{"key":"due_date","label":"Audit Due Date","sortable":true},{"key":"risk","label":"Audit Priority","sortable":true},{"key":"status","label":"Status","sortable":true}],"rows":[{"id":"ITA-00605","name":"Lenovo ThinkPad X1 Carbon Gen 11","location":"Bangalore Campus - Block B","custodian":"Ananya Roy","last_audited":"2023-10-12","due_date":"2024-10-12","risk":"High","status":"Overdue"},{"id":"ITA-00606","name":"Dell Latitude 5440 Core i7","location":"Bangalore Campus - Block A","custodian":"Syed Hashim","last_audited":"2023-10-14","due_date":"2024-10-14","risk":"Medium","status":"Overdue"},{"id":"ITA-00607","name":"Apple MacBook Pro 16\" M3 Max","location":"Mumbai Office - 4th Floor","custodian":"Vikram Sethi","last_audited":"2023-10-18","due_date":"2024-10-18","risk":"High","status":"Overdue"},{"id":"ITA-00608","name":"Dell PowerEdge R750xs Server","location":"Bangalore DC - Rack 04","custodian":"Rahul Verma","last_audited":"2023-10-25","due_date":"2024-10-25","risk":"Critical","status":"Due Today"},{"id":"ITA-00609","name":"HP Elite Dragonfly G4","location":"Delhi Hub - Executive Floor","custodian":"Pooja Nair","last_audited":"2023-11-01","due_date":"2024-11-01","risk":"Medium","status":"Scheduled"},{"id":"ITA-00610","name":"Cisco Catalyst 9300 48-Port","location":"Bangalore DC - Switch Room","custodian":"Rahul Verma","last_audited":"2023-11-05","due_date":"2024-11-05","risk":"High","status":"Scheduled"},{"id":"ITA-00611","name":"Epson WorkForce Pro WF-C5790","location":"Bangalore Campus - Finance Bay","custodian":"Tajammul Farooq","last_audited":"2023-11-08","due_date":"2024-11-08","risk":"Low","status":"Scheduled"},{"id":"ITA-00612","name":"Dell UltraSharp 27\" U2723QE","location":"Bangalore Campus - Dev Lab 4","custodian":"Syed Hashim","last_audited":"2023-11-12","due_date":"2024-11-12","risk":"Low","status":"Scheduled"},{"id":"ITA-00613","name":"Lenovo ThinkCentre M70q Tiny","location":"Pune Office - Reception","custodian":"Ananya Roy","last_audited":"2023-11-15","due_date":"2024-11-15","risk":"Low","status":"Scheduled"},{"id":"ITA-00614","name":"APC Smart-UPS 3000VA LCD","location":"Bangalore DC - UPS Room","custodian":"Rahul Verma","last_audited":"2023-11-20","due_date":"2024-11-20","risk":"High","status":"Scheduled"}]},"audit-worksheet-30-days":{"title":"Audit Worksheet (30 Days)","description":"Active 30-day inventory batch verification and serial number scanning worksheet.","kpis":[{"label":"Worksheet Targets","value":"120","change":"Current batch"},{"label":"Verified & Reconciled","value":"74","change":"61.6% completed"},{"label":"Discrepancies Flagged","value":"5","change":"Investigating"},{"label":"Days Remaining","value":"14","change":"Cycle ends Oct 31"}],"columns":[{"key":"sheet_id","label":"Batch ID","sortable":true},{"key":"asset_id","label":"Asset Tag","sortable":true},{"key":"serial","label":"Serial Number","sortable":true},{"key":"zone","label":"Campus / Bay","sortable":true},{"key":"auditor","label":"Scanned By","sortable":true},{"key":"scan_time","label":"Scan Date","sortable":true},{"key":"discrepancy","label":"Discrepancy","sortable":false},{"key":"state","label":"Worksheet State","sortable":true}],"rows":[{"sheet_id":"WS-30D-0101","asset_id":"ITA-00601","serial":"SN-DEL-100001","zone":"Bangalore - Block B (Flr 2)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:30","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0102","asset_id":"ITA-00602","serial":"SN-DEL-100002","zone":"Bangalore - Block B (Flr 2)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:32","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0103","asset_id":"ITA-00603","serial":"SN-HP-100003","zone":"Bangalore - Block B (Flr 3)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:38","discrepancy":"Location mismatch (Was A)","state":"Updated"},{"sheet_id":"WS-30D-0104","asset_id":"ITA-00604","serial":"SN-HP-100004","zone":"Bangalore - Block B (Flr 3)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:41","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0105","asset_id":"ITA-00605","serial":"SN-LEN-100005","zone":"Bangalore - Block B (Flr 4)","auditor":"Tajammul Farooq","scan_time":"2024-10-19 14:15","discrepancy":"User transferred","state":"Pending Approval"},{"sheet_id":"WS-30D-0106","asset_id":"ITA-00606","serial":"SN-DEL-100006","zone":"Bangalore - Block A (Flr 1)","auditor":"Tajammul Farooq","scan_time":"2024-10-19 14:22","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0107","asset_id":"ITA-00607","serial":"SN-APP-100007","zone":"Mumbai Office - Bay 2","auditor":"Vikram Sethi","scan_time":"2024-10-18 10:05","discrepancy":"Barcode faded (Replaced)","state":"Re-tagged"},{"sheet_id":"WS-30D-0108","asset_id":"ITA-00608","serial":"SN-DEL-100008","zone":"Bangalore DC - Rack 04","auditor":"Rahul Verma","scan_time":"2024-10-17 16:50","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0109","asset_id":"ITA-00609","serial":"SN-HP-100009","zone":"Delhi Hub - Flr 1","auditor":"Pooja Nair","scan_time":"2024-10-16 09:40","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0110","asset_id":"ITA-00610","serial":"SN-CIS-100010","zone":"Bangalore DC - Rack 01","auditor":"Rahul Verma","scan_time":"2024-10-15 15:10","discrepancy":"None (Matched)","state":"Reconciled"}]},"software-licences":{"title":"Software Licences","docType":"Software License","description":"Volume enterprise agreements, seat counts, allocation ratios, and expiry schedules.","kpis":[{"label":"Total Licences","value":"42","change":"Across 18 vendors"},{"label":"Allocated Seats","value":"1,840","change":"86.8% utilization"},{"label":"Unallocated Seats","value":"280","change":"Available pool"},{"label":"Annual SaaS Spend","value":"₹64.2L","change":"Contract commitments"}],"columns":[{"key":"id","label":"License ID","sortable":true},{"key":"software","label":"Software Suite","sortable":true},{"key":"publisher","label":"Publisher","sortable":true},{"key":"type","label":"License Model","sortable":true},{"key":"total_seats","label":"Total Seats","sortable":true},{"key":"used_seats","label":"Assigned Seats","sortable":true},{"key":"expiry","label":"Expiry Date","sortable":true},{"key":"status","label":"Compliance Status","sortable":true}],"rows":[{"id":"LIC-2024-001","software":"Microsoft 365 E5 Enterprise","publisher":"Microsoft","type":"Per User / Monthly","total_seats":"650","used_seats":"624","expiry":"2025-06-30","status":"Compliant"},{"id":"LIC-2024-002","software":"Adobe Creative Cloud All Apps","publisher":"Adobe Inc.","type":"Named User","total_seats":"85","used_seats":"82","expiry":"2025-03-31","status":"Compliant"},{"id":"LIC-2024-003","software":"GitHub Enterprise Cloud","publisher":"GitHub / MS","type":"Per Seat / Annual","total_seats":"140","used_seats":"145","expiry":"2025-04-15","status":"Over-allocated"},{"id":"LIC-2024-004","software":"Slack Enterprise Grid","publisher":"Salesforce","type":"Per User / Annual","total_seats":"700","used_seats":"688","expiry":"2025-08-31","status":"Compliant"},{"id":"LIC-2024-005","software":"Figma Organization","publisher":"Figma","type":"Editor Seat","total_seats":"60","used_seats":"58","expiry":"2025-05-30","status":"Compliant"},{"id":"LIC-2024-006","software":"Zoom Workplace Enterprise","publisher":"Zoom Video","type":"Named Host","total_seats":"200","used_seats":"164","expiry":"2025-02-28","status":"Compliant"},{"id":"LIC-2024-007","software":"Datadog APM & Infrastructure","publisher":"Datadog","type":"Host Unit","total_seats":"50","used_seats":"46","expiry":"2025-01-31","status":"Compliant"},{"id":"LIC-2024-008","software":"CrowdStrike Falcon Enterprise","publisher":"CrowdStrike","type":"Per Endpoint","total_seats":"550","used_seats":"516","expiry":"2025-07-31","status":"Compliant"},{"id":"LIC-2024-009","software":"JetBrains All Products Pack","publisher":"JetBrains","type":"Commercial Seat","total_seats":"75","used_seats":"70","expiry":"2024-12-15","status":"Renewal Pending"},{"id":"LIC-2024-010","software":"Atlassian Jira Software Cloud","publisher":"Atlassian","type":"Tiered User","total_seats":"300","used_seats":"292","expiry":"2025-09-30","status":"Compliant"}]},"devices-by-software":{"title":"Devices by Software","description":"Endpoint application mappings detected via GLPI Agent, Intune MDM, and Entra SSO.","kpis":[{"label":"Tracked Packages","value":"156","change":"Curated catalog"},{"label":"Managed Endpoints","value":"492","change":"Windows, Mac & Linux"},{"label":"Outdated Builds","value":"34","change":"Patches scheduled"},{"label":"Discovery Health","value":"99.2%","change":"Last run 12m ago"}],"columns":[{"key":"pkg_id","label":"Package ID","sortable":true},{"key":"app_title","label":"Application Name","sortable":true},{"key":"version","label":"Installed Version","sortable":true},{"key":"device_name","label":"Device Hostname","sortable":true},{"key":"platform","label":"Platform / OS","sortable":true},{"key":"user","label":"Primary User","sortable":true},{"key":"last_detected","label":"Last Detected","sortable":true},{"key":"compliance","label":"Patch State","sortable":true}],"rows":[{"pkg_id":"PKG-001","app_title":"Microsoft 365 Apps for Enterprise","version":"16.0.17830.20138","device_name":"blr-lap-05.internal.corp","platform":"Windows 11 Enterprise","user":"ananya.roy@proficientnow.com","last_detected":"2024-10-21 08:30","compliance":"Current"},{"pkg_id":"PKG-002","app_title":"CrowdStrike Falcon Sensor","version":"7.14.18305.0","device_name":"blr-lap-05.internal.corp","platform":"Windows 11 Enterprise","user":"ananya.roy@proficientnow.com","last_detected":"2024-10-21 08:30","compliance":"Current"},{"pkg_id":"PKG-003","app_title":"Docker Desktop","version":"4.34.2","device_name":"blr-lap-06.internal.corp","platform":"macOS Sonoma 14.6","user":"shashim@proficientnow.com","last_detected":"2024-10-21 07:15","compliance":"Current"},{"pkg_id":"PKG-004","app_title":"Google Chrome Enterprise","version":"130.0.6723.59","device_name":"blr-lap-06.internal.corp","platform":"macOS Sonoma 14.6","user":"shashim@proficientnow.com","last_detected":"2024-10-21 07:15","compliance":"Current"},{"pkg_id":"PKG-005","app_title":"Slack Desktop Client","version":"4.40.127","device_name":"blr-lap-07.internal.corp","platform":"macOS Sonoma 14.5","user":"vsethi@proficientnow.com","last_detected":"2024-10-20 18:20","compliance":"Update Available"},{"pkg_id":"PKG-006","app_title":"IntelliJ IDEA Ultimate","version":"2024.2.3","device_name":"blr-lap-07.internal.corp","platform":"macOS Sonoma 14.5","user":"vsethi@proficientnow.com","last_detected":"2024-10-20 18:20","compliance":"Current"},{"pkg_id":"PKG-007","app_title":"OpenVPN Connect","version":"3.4.4","device_name":"del-lap-09.internal.corp","platform":"Windows 11 Enterprise","user":"pnair@proficientnow.com","last_detected":"2024-10-20 16:10","compliance":"Current"},{"pkg_id":"PKG-008","app_title":"7-Zip File Archiver","version":"24.08","device_name":"del-lap-09.internal.corp","platform":"Windows 11 Enterprise","user":"pnair@proficientnow.com","last_detected":"2024-10-20 16:10","compliance":"Current"},{"pkg_id":"PKG-009","app_title":"Python 3 Runtime","version":"3.11.8","device_name":"blr-srv-08.internal.corp","platform":"Ubuntu 22.04 LTS","user":"system.service","last_detected":"2024-10-20 12:00","compliance":"Current"},{"pkg_id":"PKG-010","app_title":"PostgreSQL Client Tools","version":"16.4","device_name":"blr-srv-08.internal.corp","platform":"Ubuntu 22.04 LTS","user":"system.service","last_detected":"2024-10-20 12:00","compliance":"Current"},{"pkg_id":"PKG-011","app_title":"Visual Studio Code","version":"1.94.2","device_name":"blr-lap-11.internal.corp","platform":"Windows 11 Enterprise","user":"tfarooq@proficientnow.com","last_detected":"2024-10-19 14:00","compliance":"Current"},{"pkg_id":"PKG-012","app_title":"Zoom Meetings Client","version":"6.2.3","device_name":"blr-lap-11.internal.corp","platform":"Windows 11 Enterprise","user":"tfarooq@proficientnow.com","last_detected":"2024-10-19 14:00","compliance":"Current"}]},"licence-compliance":{"title":"Licence Compliance","description":"Variance analysis comparing contractual license entitlements against real endpoint installations.","kpis":[{"label":"Fully Compliant","value":"28","change":"Within safe margins"},{"label":"Over-allocated","value":"4","change":"Requires seat purchase"},{"label":"Under-utilized","value":"9","change":"Savings opportunity"},{"label":"True-up Exposure","value":"₹4.2L","change":"Audit estimate"}],"columns":[{"key":"product","label":"Licensed Product","sortable":true},{"key":"publisher","label":"Publisher","sortable":true},{"key":"entitled","label":"Entitled Seats","sortable":true},{"key":"detected","label":"Active Installs","sortable":true},{"key":"variance","label":"Seat Variance","sortable":true},{"key":"exposure","label":"Cost Exposure","sortable":true},{"key":"risk_level","label":"Risk Rating","sortable":true},{"key":"action","label":"Recommended Action","sortable":false}],"rows":[{"product":"GitHub Enterprise Cloud","publisher":"Microsoft","entitled":"140","detected":"145","variance":"+5 (Deficit)","exposure":"₹1,05,000","risk_level":"High","action":"Procure 5 additional seats via CSP"},{"product":"Adobe Creative Cloud","publisher":"Adobe","entitled":"85","detected":"88","variance":"+3 (Deficit)","exposure":"₹1,80,000","risk_level":"High","action":"Reclaim unused seats or buy licenses"},{"product":"JetBrains All Products Pack","publisher":"JetBrains","entitled":"75","detected":"77","variance":"+2 (Deficit)","exposure":"₹84,000","risk_level":"Medium","action":"Reassign 2 idle licenses"},{"product":"Figma Organization","publisher":"Figma","entitled":"60","detected":"62","variance":"+2 (Deficit)","exposure":"₹55,000","risk_level":"Medium","action":"Convert 2 users to Viewer-Restricted"},{"product":"Microsoft 365 E5","publisher":"Microsoft","entitled":"650","detected":"624","variance":"-26 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Pool reserved for onboarding"},{"product":"Slack Enterprise Grid","publisher":"Salesforce","entitled":"700","detected":"688","variance":"-12 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Sufficient buffer maintained"},{"product":"CrowdStrike Falcon","publisher":"CrowdStrike","entitled":"550","detected":"516","variance":"-34 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Buffer for new laptop shipments"},{"product":"Zoom Workplace","publisher":"Zoom Video","entitled":"200","detected":"164","variance":"-36 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Consider downsizing on next renewal"}]},"prohibited-software":{"title":"Prohibited Software","description":"Blacklisted executables, unapproved VPNs, peer-to-peer clients, and security policy violations.","kpis":[{"label":"Active Alerts","value":"6","change":"Policy violations"},{"label":"High Severity","value":"3","change":"Immediate isolate"},{"label":"Isolated Devices","value":"2","change":"Network restricted"},{"label":"Remediated YTD","value":"41","change":"Cleaned successfully"}],"columns":[{"key":"alert_id","label":"Alert ID","sortable":true},{"key":"app_name","label":"Prohibited Software","sortable":true},{"key":"category","label":"Risk Category","sortable":true},{"key":"device","label":"Endpoint Device","sortable":true},{"key":"user","label":"Logged-in User","sortable":true},{"key":"detected_at","label":"Detection Date","sortable":true},{"key":"severity","label":"Severity","sortable":true},{"key":"status","label":"Containment","sortable":true}],"rows":[{"alert_id":"SEC-PRO-081","app_name":"BitTorrent Client v7.10","category":"P2P File Sharing","device":"blr-lap-44.internal.corp","user":"karan.j@proficientnow.com","detected_at":"2024-10-21 08:14","severity":"High","status":"Process Blocked"},{"alert_id":"SEC-PRO-080","app_name":"NordVPN Consumer Client","category":"Unapproved VPN / Tunnel","device":"del-lap-19.internal.corp","user":"amrita.s@proficientnow.com","detected_at":"2024-10-20 19:40","severity":"High","status":"Quarantined"},{"alert_id":"SEC-PRO-079","app_name":"CCleaner Free Utility","category":"Unvetted Registry Cleaner","device":"blr-lap-29.internal.corp","user":"rahul.t@proficientnow.com","detected_at":"2024-10-20 11:25","severity":"Medium","status":"Pending Removal"},{"alert_id":"SEC-PRO-078","app_name":"AnyDesk Remote Desktop","category":"Shadow Remote Access","device":"mum-lap-08.internal.corp","user":"deepak.v@proficientnow.com","detected_at":"2024-10-19 14:50","severity":"High","status":"Port Blocked"},{"alert_id":"SEC-PRO-077","app_name":"uTorrent Web Installer","category":"P2P File Sharing","device":"blr-lap-52.internal.corp","user":"neha.k@proficientnow.com","detected_at":"2024-10-18 16:30","severity":"High","status":"Quarantined"},{"alert_id":"SEC-PRO-076","app_name":"WireShark Portable","category":"Network Packet Sniffer","device":"blr-lap-12.internal.corp","user":"manish.p@proficientnow.com","detected_at":"2024-10-17 10:15","severity":"Medium","status":"Under Review"},{"alert_id":"SEC-PRO-075","app_name":"Cheat Engine Memory Mod","category":"Process Injection Tool","device":"blr-lap-88.internal.corp","user":"siddharth.m@proficientnow.com","detected_at":"2024-10-15 13:00","severity":"Critical","status":"Isolated"},{"alert_id":"SEC-PRO-074","app_name":"Telegram Desktop (Direct .exe)","category":"Unapproved Messaging App","device":"del-lap-22.internal.corp","user":"priya.g@proficientnow.com","detected_at":"2024-10-14 17:45","severity":"Low","status":"User Warned"}]},"software-cross-check":{"title":"Software Cross-Check","description":"Multi-source reconciliation comparing GLPI agent inventory against Microsoft Intune MDM & Entra ID.","kpis":[{"label":"Reconciled Endpoints","value":"380","change":"Cross-verified"},{"label":"Full Source Matches","value":"352","change":"92.6% parity"},{"label":"Identified Discrepancies","value":"28","change":"Resolution underway"},{"label":"Discovery Latency","value":"< 5m","change":"Real-time telemetry"}],"columns":[{"key":"tag","label":"Device Tag","sortable":true},{"key":"app","label":"Target Software","sortable":true},{"key":"glpi","label":"GLPI Agent Scan","sortable":true},{"key":"intune","label":"Intune MDM Scan","sortable":true},{"key":"entra","label":"Entra SSO Activity","sortable":true},{"key":"delta","label":"Discrepancy Detail","sortable":false},{"key":"action","label":"Resolution Path","sortable":true}],"rows":[{"tag":"ITA-00605","app":"Microsoft 365 Enterprise","glpi":"v16.0.17830 (Installed)","intune":"Compliant Build","entra":"Active Sign-in (Today)","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00606","app":"CrowdStrike Falcon Sensor","glpi":"v7.14 (Active)","intune":"Installed","entra":"N/A (Agent)","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00607","app":"Adobe Creative Cloud","glpi":"Not Detected","intune":"Not Managed","entra":"Active Token (Yesterday)","delta":"Browser SSO without local install","action":"Assign Local App"},{"tag":"ITA-00608","app":"Docker Desktop Pro","glpi":"v4.34.2 (Installed)","intune":"Policy Enforced","entra":"SSO Confirmed","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00609","app":"Slack Desktop Client","glpi":"v4.38.11 (Outdated)","intune":"Update Required","entra":"Active Sign-in","delta":"Version mismatch with policy baseline","action":"Push Intune Patch"},{"tag":"ITA-00610","app":"Zoom Meetings Client","glpi":"v6.2.3 (Installed)","intune":"Compliant Build","entra":"Active Sign-in","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00611","app":"Figma Desktop","glpi":"Installed","intune":"Not Monitored","entra":"Active Sign-in","delta":"Intune catalog missing package definition","action":"Catalog Ingestion"},{"tag":"ITA-00612","app":"JetBrains IntelliJ IDEA","glpi":"v2024.2.3","intune":"Compliant","entra":"SSO Confirmed","delta":"Full Parity","action":"Synchronized"}]},"saas-renewal-watch":{"title":"SaaS Renewal Watch","description":"Upcoming cloud subscriptions, termination notice periods, pricing reviews, and auto-renew dates.","kpis":[{"label":"Renewals (Next 60d)","value":"5","change":"Negotiation window open"},{"label":"Monthly Run Rate","value":"₹12.8L","change":"Cloud spend"},{"label":"Potential Savings","value":"₹3.4L","change":"Idle seat reclamation"},{"label":"Auto-Renew Active","value":"18","change":"Notice required"}],"columns":[{"key":"service","label":"SaaS Service","sortable":true},{"key":"vendor","label":"Vendor / Provider","sortable":true},{"key":"owner","label":"Internal Owner","sortable":true},{"key":"cadence","label":"Billing Cadence","sortable":true},{"key":"renewal_date","label":"Renewal Date","sortable":true},{"key":"notice_window","label":"Notice Period","sortable":true},{"key":"cost","label":"Cost / Cycle","sortable":true},{"key":"status","label":"Action State","sortable":true}],"rows":[{"service":"JetBrains All Products Pack","vendor":"JetBrains s.r.o.","owner":"Vikram Sethi (Eng)","cadence":"Annual","renewal_date":"2024-12-15","notice_window":"30 days before","cost":"₹6,40,000","status":"In Review"},{"service":"Datadog Cloud Monitoring","vendor":"Datadog Inc.","owner":"Rahul Verma (DevOps)","cadence":"Annual","renewal_date":"2025-01-31","notice_window":"45 days before","cost":"₹14,50,000","status":"Pricing RFP"},{"service":"Zoom Workplace Enterprise","vendor":"Zoom Video Comm.","owner":"Tajammul Farooq (IT)","cadence":"Annual","renewal_date":"2025-02-28","notice_window":"30 days before","cost":"₹8,20,000","status":"Downsize Review"},{"service":"Adobe Creative Cloud","vendor":"Adobe Inc.","owner":"Ananya Roy (Design)","cadence":"Annual","renewal_date":"2025-03-31","notice_window":"30 days before","cost":"₹11,40,000","status":"Scheduled"},{"service":"GitHub Enterprise Cloud","vendor":"Microsoft GitHub","owner":"Syed Hashim (IT)","cadence":"Annual","renewal_date":"2025-04-15","notice_window":"60 days before","cost":"₹18,50,000","status":"Scheduled"},{"service":"Figma Organization","vendor":"Figma Inc.","owner":"Ananya Roy (Design)","cadence":"Annual","renewal_date":"2025-05-30","notice_window":"30 days before","cost":"₹7,80,000","status":"Active"},{"service":"Microsoft 365 E5","vendor":"Microsoft Corp.","owner":"Syed Hashim (IT)","cadence":"Annual","renewal_date":"2025-06-30","notice_window":"60 days before","cost":"₹42,00,000","status":"Active"},{"service":"Slack Enterprise Grid","vendor":"Salesforce.com","owner":"Syed Hashim (IT)","cadence":"Annual","renewal_date":"2025-08-31","notice_window":"60 days before","cost":"₹16,20,000","status":"Active"}]},"identity-access":{"title":"Identity & Access","description":"Microsoft Entra ID directory accounts, privileged administrator roles, and MFA security status.","kpis":[{"label":"Synchronized Users","value":"2,410","change":"Directory active"},{"label":"Privileged Admins","value":"14","change":"PIM enforced"},{"label":"Orphaned Accounts","value":"3","change":"Flagged for removal"},{"label":"MFA Enforced Rate","value":"98.9%","change":"Conditional Access"}],"columns":[{"key":"upn","label":"Account (UPN)","sortable":true},{"key":"name","label":"Display Name","sortable":true},{"key":"department","label":"Department","sortable":true},{"key":"title","label":"Job Title","sortable":true},{"key":"role","label":"Role Level","sortable":true},{"key":"mfa","label":"MFA Posture","sortable":true},{"key":"last_login","label":"Last Login","sortable":true},{"key":"status","label":"Account State","sortable":true}],"rows":[{"upn":"shashim@proficientnow.com","name":"Syed Hashim","department":"IT & Infrastructure","title":"Senior IT Systems Manager","role":"Global Admin (PIM)","mfa":"FIDO2 / MS Authenticator","last_login":"Today, 09:14 AM","status":"Active"},{"upn":"ananya.roy@proficientnow.com","name":"Ananya Roy","department":"IT Operations","title":"IT Asset & Logistics Lead","role":"Asset Admin","mfa":"MS Authenticator","last_login":"Today, 08:45 AM","status":"Active"},{"upn":"tfarooq@proficientnow.com","name":"Tajammul Farooq","department":"IT Support","title":"Lead Systems Administrator","role":"Helpdesk Admin","mfa":"MS Authenticator","last_login":"Today, 08:50 AM","status":"Active"},{"upn":"vsethi@proficientnow.com","name":"Vikram Sethi","department":"Engineering","title":"Principal Architect","role":"User","mfa":"MS Authenticator","last_login":"Today, 09:02 AM","status":"Active"},{"upn":"pnair@proficientnow.com","name":"Pooja Nair","department":"Information Security","title":"Lead InfoSec & Compliance","role":"Security Admin","mfa":"FIDO2 Hardware Key","last_login":"Today, 07:30 AM","status":"Active"},{"upn":"rverma@proficientnow.com","name":"Rahul Verma","department":"Cloud Platform","title":"Cloud DevOps Specialist","role":"Cloud App Admin","mfa":"MS Authenticator","last_login":"Yesterday, 11:20 PM","status":"Active"},{"upn":"contractor.guest@proficientnow.com","name":"External Contractor 01","department":"Contractors","title":"Front-end Consultant","role":"Guest User","mfa":"SMS OTP (Non-compliant)","last_login":"14 days ago","status":"Needs Review"},{"upn":"ex.employee@proficientnow.com","name":"Former Employee Archive","department":"Finance (Ex)","title":"Accounts Officer","role":"User (Disabled)","mfa":"Disabled","last_login":"92 days ago","status":"Orphan Flagged"}]},"exceptions":{"title":"Exceptions","description":"Hardware and software exceptions: unassigned hardware, missing serials, IP conflicts, or orphan CIs.","kpis":[{"label":"Active Exceptions","value":"34","change":"8 critical severity"},{"label":"Unassigned Hardware","value":"12","change":"In storage rooms"},{"label":"Missing Primary IP","value":"7","change":"Agent sync required"},{"label":"Auto-Resolvable","value":"15","change":"Ready for batch fix"}],"subFilters":["All","Unassigned Hardware","Expired Warranty","Missing Primary IP","Duplicate Serial"],"columns":[{"key":"id","label":"Exception ID","sortable":true},{"key":"ci_tag","label":"CI Tag","sortable":true},{"key":"category","label":"Exception Category","sortable":true},{"key":"severity","label":"Severity","sortable":true},{"key":"root_cause","label":"Root Cause Summary","sortable":false},{"key":"detected_date","label":"Detected Date","sortable":true},{"key":"assignee","label":"Assigned Engineer","sortable":true},{"key":"status","label":"Status","sortable":true}],"rows":[{"id":"EXC-2024-041","ci_tag":"ITA-00621","category":"Unassigned Hardware","severity":"Medium","root_cause":"Dell Latitude 5440 in Bangalore Storage without assigned custodian","detected_date":"2024-10-20","assignee":"Ananya Roy","status":"Open"},{"id":"EXC-2024-042","ci_tag":"ITA-00622","category":"Missing Primary IP","severity":"High","root_cause":"Rack server responding to ICMP but primary_ip field is null","detected_date":"2024-10-20","assignee":"Rahul Verma","status":"In Progress"},{"id":"EXC-2024-043","ci_tag":"ITA-00512","category":"Expired Warranty","severity":"High","root_cause":"Warranty terminated on 2024-10-14 without extended support PO","detected_date":"2024-10-19","assignee":"Syed Hashim","status":"Escalated"},{"id":"EXC-2024-044","ci_tag":"ITA-00630","category":"Duplicate Serial","severity":"Critical","root_cause":"Serial number SN-DEL-991820 registered on two separate CI records","detected_date":"2024-10-18","assignee":"Syed Hashim","status":"Investigating"},{"id":"EXC-2024-045","ci_tag":"ITA-00634","category":"Unassigned Hardware","severity":"Low","root_cause":"HP Wireless Mouse unlinked from host PC after docking station swap","detected_date":"2024-10-17","assignee":"Tajammul Farooq","status":"Open"},{"id":"EXC-2024-046","ci_tag":"ITA-00638","category":"Missing Primary IP","severity":"Medium","root_cause":"Network printer on DHCP without fixed IP reservation","detected_date":"2024-10-16","assignee":"Tajammul Farooq","status":"Pending Config"},{"id":"EXC-2024-047","ci_tag":"ITA-00518","category":"Expired Warranty","severity":"Medium","root_cause":"Lenovo Premier support lapsed 7 days ago","detected_date":"2024-10-15","assignee":"Ananya Roy","status":"PO In Process"},{"id":"EXC-2024-048","ci_tag":"ITA-00642","category":"Duplicate Serial","severity":"Critical","root_cause":"Cisco SFP module serial duplicated across switch stack ports","detected_date":"2024-10-14","assignee":"Rahul Verma","status":"Open"}]},"ticket-queue":{"title":"Ticket Queue","description":"Service desk incidents, asset provisioning requests, repair dispatches, and CMDB tasks.","kpis":[{"label":"Open Work Orders","value":"22","change":"8 high priority"},{"label":"SLA At Risk","value":"3","change":"< 2 hours left"},{"label":"Resolved Today","value":"15","change":"Average resolution 2.4h"},{"label":"First Contact Fix","value":"91.2%","change":"+3.4% this month"}],"columns":[{"key":"ticket_id","label":"Ticket ID","sortable":true},{"key":"subject","label":"Request Summary","sortable":true},{"key":"requester","label":"Requester","sortable":true},{"key":"priority","label":"Priority","sortable":true},{"key":"category","label":"Category","sortable":true},{"key":"assigned_to","label":"Assigned Engineer","sortable":true},{"key":"created","label":"Logged At","sortable":true},{"key":"status","label":"Ticket Status","sortable":true}],"rows":[{"ticket_id":"INC-2024-1092","subject":"Laptop display flickering on Dell Latitude 5440","requester":"Kavita Menon","priority":"High","category":"Hardware Repair","assigned_to":"Tajammul Farooq","created":"2024-10-21 09:20","status":"In Progress"},{"ticket_id":"REQ-2024-0841","subject":"New hire onboarding hardware bundle (MacBook Pro + Peripheral)","requester":"HR Operations","priority":"Medium","category":"Asset Provisioning","assigned_to":"Ananya Roy","created":"2024-10-21 08:45","status":"Pending Approval"},{"ticket_id":"INC-2024-1091","subject":"Unable to connect to Bangalore DC VPN gateway","requester":"Amit Shinde","priority":"Urgent","category":"Network & Access","assigned_to":"Rahul Verma","created":"2024-10-21 08:30","status":"Assigned"},{"ticket_id":"REQ-2024-0840","subject":"Additional 27\" 4K Monitor request for Design Team","requester":"Sanjay Dutt","priority":"Low","category":"Peripheral Request","assigned_to":"Ananya Roy","created":"2024-10-20 17:15","status":"Scheduled"},{"ticket_id":"INC-2024-1090","subject":"Wireless keyboard battery compartment loose","requester":"Deepa Krishnan","priority":"Low","category":"Peripheral Swap","assigned_to":"Tajammul Farooq","created":"2024-10-20 15:40","status":"Resolved"},{"ticket_id":"REQ-2024-0839","subject":"GitHub Enterprise seat allocation for Mobile Team","requester":"Vikram Sethi","priority":"Medium","category":"Software Entitlement","assigned_to":"Syed Hashim","created":"2024-10-20 14:10","status":"Completed"},{"ticket_id":"INC-2024-1089","subject":"CrowdStrike Falcon Sensor flagging development binary","requester":"Rohan Mehra","priority":"High","category":"Security False Positive","assigned_to":"Pooja Nair","created":"2024-10-20 11:30","status":"In Progress"},{"ticket_id":"REQ-2024-0838","subject":"Asset transfer sign-off from Dev Lab to QA Stage","requester":"Nisha Gupta","priority":"Low","category":"CMDB Custody Change","assigned_to":"Ananya Roy","created":"2024-10-19 16:20","status":"Resolved"},{"ticket_id":"INC-2024-1088","subject":"Bangalore Block B Floor 3 Network Switch port dead","requester":"Facilities Dept","priority":"High","category":"Infrastructure","assigned_to":"Rahul Verma","created":"2024-10-19 13:00","status":"Resolved"},{"ticket_id":"REQ-2024-0837","subject":"Decommissioning and safe disposal of 4 legacy servers","requester":"IT Asset Admin","priority":"Medium","category":"Disposal & Recycling","assigned_to":"Syed Hashim","created":"2024-10-18 10:45","status":"In Progress"}]}};
+    const reportConfigsData = {"asset-events":{"title":"Asset Events","docType":"IT Asset Event","description":"Complete audit trail of lifecycle movements, reassignments, repairs, and checkouts.","kpis":[{"label":"Total Events","value":"142","change":"+12 this week","color":"blue"},{"label":"Custody Transfers","value":"28","change":"8 pending sign-off","color":"amber"},{"label":"Repairs Logged","value":"14","change":"4 in progress","color":"red"},{"label":"Auto-Logged (Sync)","value":"118","change":"98.5% confidence","color":"emerald"}],"columns":[{"key":"id","label":"Event ID","sortable":true},{"key":"asset_id","label":"Asset ID","sortable":true},{"key":"asset_name","label":"Asset Name","sortable":true},{"key":"event_type","label":"Event Type","sortable":true},{"key":"initiated_by","label":"Initiated By","sortable":true},{"key":"timestamp","label":"Timestamp","sortable":true},{"key":"details","label":"Event Details","sortable":false},{"key":"status","label":"Status","sortable":true}],"rows":[{"id":"EVT-2024-0891","asset_id":"ITA-00605","asset_name":"Lenovo ThinkPad X1 Carbon Gen 11","event_type":"Transfer","initiated_by":"Syed Hashim","timestamp":"2024-10-21 09:15","details":"Assigned to Ananya Roy (Design Dept)","status":"Completed"},{"id":"EVT-2024-0890","asset_id":"ITA-00606","asset_name":"Dell Latitude 5440 Core i7","event_type":"Audit Verified","initiated_by":"Ananya Roy","timestamp":"2024-10-20 14:30","details":"Physical barcode scanned in Block B","status":"Verified"},{"id":"EVT-2024-0889","asset_id":"ITA-00607","asset_name":"Apple MacBook Pro 16\" M3 Max","event_type":"Repair Requested","initiated_by":"Vikram Sethi","timestamp":"2024-10-19 11:20","details":"Trackpad responsiveness diagnostic","status":"In Repair"},{"id":"EVT-2024-0888","asset_id":"ITA-00601","asset_name":"Dell wireless mouse 04WJ8P","event_type":"Check-out","initiated_by":"Tajammul Farooq","timestamp":"2024-10-18 16:45","details":"Issued to Workstation B-12","status":"Completed"},{"id":"EVT-2024-0887","asset_id":"ITA-00608","asset_name":"Dell PowerEdge R750xs Server","event_type":"IP Reassigned","initiated_by":"System (GLPI)","timestamp":"2024-10-18 03:00","details":"Primary IP bound to 10.142.12.108","status":"Completed"},{"id":"EVT-2024-0886","asset_id":"ITA-00602","asset_name":"Dell wired keyboard KB216","event_type":"Location Move","initiated_by":"Syed Hashim","timestamp":"2024-10-17 10:10","details":"Transferred from Storage to Block A","status":"Completed"},{"id":"EVT-2024-0885","asset_id":"ITA-00609","asset_name":"HP Elite Dragonfly G4","event_type":"Commissioned","initiated_by":"Syed Hashim","timestamp":"2024-10-16 12:00","details":"Purchased via PO-2024-0091","status":"Active"},{"id":"EVT-2024-0884","asset_id":"ITA-00610","asset_name":"Cisco Catalyst 9300 48-Port","event_type":"Firmware Update","initiated_by":"Rahul Verma","timestamp":"2024-10-15 22:30","details":"Upgraded to Cisco IOS XE 17.9.4a","status":"Completed"},{"id":"EVT-2024-0883","asset_id":"ITA-00611","asset_name":"Epson WorkForce Pro WF-C5790","event_type":"Maintenance","initiated_by":"Vendor Support","timestamp":"2024-10-14 15:40","details":"Roller kit replacement complete","status":"Completed"},{"id":"EVT-2024-0882","asset_id":"ITA-00612","asset_name":"Dell UltraSharp 27\" U2723QE","event_type":"Transfer","initiated_by":"Pooja Nair","timestamp":"2024-10-13 11:05","details":"Assigned to Dev Lab 4","status":"Completed"},{"id":"EVT-2024-0881","asset_id":"ITA-00613","asset_name":"Lenovo ThinkCentre M70q Tiny","event_type":"Decommissioned","initiated_by":"Syed Hashim","timestamp":"2024-10-12 17:00","details":"End of lifecycle write-off","status":"Retired"},{"id":"EVT-2024-0880","asset_id":"ITA-00614","asset_name":"APC Smart-UPS 3000VA LCD","event_type":"Battery Check","initiated_by":"Ananya Roy","timestamp":"2024-10-11 13:20","details":"Health rating 94% nominal","status":"Verified"}]},"warranty-expiring":{"title":"Warranty Expiring","description":"Hardware equipment with manufacturer or OEM warranty terminating within 90 days.","kpis":[{"label":"Expiring in 30 Days","value":"8","change":"Critical attention","color":"red"},{"label":"Expiring in 60-90 Days","value":"16","change":"Quote requests sent","color":"amber"},{"label":"Total Replacement Value","value":"₹18.4L","change":"Budget impact","color":"blue"},{"label":"Vendor Renewals Active","value":"4","change":"Dell & AppleCare","color":"emerald"}],"columns":[{"key":"id","label":"Asset ID","sortable":true},{"key":"asset_name","label":"Asset Name","sortable":true},{"key":"mfg","label":"Manufacturer","sortable":true},{"key":"serial","label":"Serial No","sortable":true},{"key":"warranty_end","label":"Warranty End","sortable":true},{"key":"days_left","label":"Days Left","sortable":true},{"key":"vendor","label":"Support Vendor","sortable":true},{"key":"status","label":"Action Status","sortable":true}],"rows":[{"id":"ITA-00512","asset_name":"Dell Latitude 7420 Core i7","mfg":"Dell","serial":"SN-DEL-992101","warranty_end":"2024-11-04","days_left":"14 days","vendor":"Dell ProSupport","status":"Renewal Pending"},{"id":"ITA-00518","asset_name":"Lenovo ThinkPad T14 Gen 2","mfg":"Lenovo","serial":"SN-LEN-881240","warranty_end":"2024-11-10","days_left":"20 days","vendor":"Lenovo Premier","status":"Quote Received"},{"id":"ITA-00522","asset_name":"Dell PowerEdge R640 Server","mfg":"Dell","serial":"SN-DEL-771923","warranty_end":"2024-11-15","days_left":"25 days","vendor":"SBM Computers","status":"Urgent Review"},{"id":"ITA-00531","asset_name":"Apple MacBook Air 13\" M1","mfg":"Apple","serial":"SN-APP-662301","warranty_end":"2024-11-22","days_left":"32 days","vendor":"AppleCare Enterprise","status":"Renewal Pending"},{"id":"ITA-00540","asset_name":"HP LaserJet Enterprise M507","mfg":"HP","serial":"SN-HP-551982","warranty_end":"2024-11-28","days_left":"38 days","vendor":"HP Care Pack","status":"Under Review"},{"id":"ITA-00544","asset_name":"Cisco Catalyst 2960-X Switch","mfg":"Cisco","serial":"SN-CIS-441029","warranty_end":"2024-12-05","days_left":"45 days","vendor":"Cisco SMARTnet","status":"Quote Received"},{"id":"ITA-00551","asset_name":"Dell UltraSharp 34\" Curved","mfg":"Dell","serial":"SN-DEL-339102","warranty_end":"2024-12-12","days_left":"52 days","vendor":"Dell ProSupport","status":"Renewal Pending"},{"id":"ITA-00560","asset_name":"Fortinet FortiGate 100F Firewall","mfg":"Fortinet","serial":"SN-FOR-228190","warranty_end":"2024-12-20","days_left":"60 days","vendor":"FortiCare 24x7","status":"Scheduled"},{"id":"ITA-00568","asset_name":"Synology RackStation RS2423+","mfg":"Synology","serial":"SN-SYN-110293","warranty_end":"2025-01-08","days_left":"79 days","vendor":"Synology Extended","status":"Monitoring"},{"id":"ITA-00572","asset_name":"Polycom RealPresence Group 500","mfg":"Poly","serial":"SN-POL-990182","warranty_end":"2025-01-19","days_left":"90 days","vendor":"Polycom Advantage","status":"Monitoring"}]},"physical-audit-due":{"title":"Physical Audit Due","description":"Hardware assets requiring physical verification, barcode scan, and location reconciliation.","kpis":[{"label":"Audits Overdue","value":"24","change":"Requires field check","color":"red"},{"label":"Due This Month","value":"38","change":"Scheduled cycles","color":"amber"},{"label":"Audited YTD","value":"312","change":"88.4% on-target","color":"blue"},{"label":"Reconciliation Rate","value":"96.2%","change":"Minimal variances","color":"emerald"}],"columns":[{"key":"id","label":"Asset ID","sortable":true},{"key":"name","label":"Asset Title","sortable":true},{"key":"location","label":"Expected Location","sortable":true},{"key":"custodian","label":"Assigned Custodian","sortable":true},{"key":"last_audited","label":"Last Audited","sortable":true},{"key":"due_date","label":"Audit Due Date","sortable":true},{"key":"risk","label":"Audit Priority","sortable":true},{"key":"status","label":"Status","sortable":true}],"rows":[{"id":"ITA-00605","name":"Lenovo ThinkPad X1 Carbon Gen 11","location":"Bangalore Campus - Block B","custodian":"Ananya Roy","last_audited":"2023-10-12","due_date":"2024-10-12","risk":"High","status":"Overdue"},{"id":"ITA-00606","name":"Dell Latitude 5440 Core i7","location":"Bangalore Campus - Block A","custodian":"Syed Hashim","last_audited":"2023-10-14","due_date":"2024-10-14","risk":"Medium","status":"Overdue"},{"id":"ITA-00607","name":"Apple MacBook Pro 16\" M3 Max","location":"Mumbai Office - 4th Floor","custodian":"Vikram Sethi","last_audited":"2023-10-18","due_date":"2024-10-18","risk":"High","status":"Overdue"},{"id":"ITA-00608","name":"Dell PowerEdge R750xs Server","location":"Bangalore DC - Rack 04","custodian":"Rahul Verma","last_audited":"2023-10-25","due_date":"2024-10-25","risk":"Critical","status":"Due Today"},{"id":"ITA-00609","name":"HP Elite Dragonfly G4","location":"Delhi Hub - Executive Floor","custodian":"Pooja Nair","last_audited":"2023-11-01","due_date":"2024-11-01","risk":"Medium","status":"Scheduled"},{"id":"ITA-00610","name":"Cisco Catalyst 9300 48-Port","location":"Bangalore DC - Switch Room","custodian":"Rahul Verma","last_audited":"2023-11-05","due_date":"2024-11-05","risk":"High","status":"Scheduled"},{"id":"ITA-00611","name":"Epson WorkForce Pro WF-C5790","location":"Bangalore Campus - Finance Bay","custodian":"Tajammul Farooq","last_audited":"2023-11-08","due_date":"2024-11-08","risk":"Low","status":"Scheduled"},{"id":"ITA-00612","name":"Dell UltraSharp 27\" U2723QE","location":"Bangalore Campus - Dev Lab 4","custodian":"Syed Hashim","last_audited":"2023-11-12","due_date":"2024-11-12","risk":"Low","status":"Scheduled"},{"id":"ITA-00613","name":"Lenovo ThinkCentre M70q Tiny","location":"Pune Office - Reception","custodian":"Ananya Roy","last_audited":"2023-11-15","due_date":"2024-11-15","risk":"Low","status":"Scheduled"},{"id":"ITA-00614","name":"APC Smart-UPS 3000VA LCD","location":"Bangalore DC - UPS Room","custodian":"Rahul Verma","last_audited":"2023-11-20","due_date":"2024-11-20","risk":"High","status":"Scheduled"}]},"audit-worksheet-30-days":{"title":"Audit Worksheet (30 Days)","description":"Active 30-day inventory batch verification and serial number scanning worksheet.","kpis":[{"label":"Worksheet Targets","value":"120","change":"Current batch","color":"blue"},{"label":"Verified & Reconciled","value":"74","change":"61.6% completed","color":"emerald"},{"label":"Discrepancies Flagged","value":"5","change":"Investigating","color":"red"},{"label":"Days Remaining","value":"14","change":"Cycle ends Oct 31","color":"amber"}],"columns":[{"key":"sheet_id","label":"Batch ID","sortable":true},{"key":"asset_id","label":"Asset Tag","sortable":true},{"key":"serial","label":"Serial Number","sortable":true},{"key":"zone","label":"Campus / Bay","sortable":true},{"key":"auditor","label":"Scanned By","sortable":true},{"key":"scan_time","label":"Scan Date","sortable":true},{"key":"discrepancy","label":"Discrepancy","sortable":false},{"key":"state","label":"Worksheet State","sortable":true}],"rows":[{"sheet_id":"WS-30D-0101","asset_id":"ITA-00601","serial":"SN-DEL-100001","zone":"Bangalore - Block B (Flr 2)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:30","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0102","asset_id":"ITA-00602","serial":"SN-DEL-100002","zone":"Bangalore - Block B (Flr 2)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:32","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0103","asset_id":"ITA-00603","serial":"SN-HP-100003","zone":"Bangalore - Block B (Flr 3)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:38","discrepancy":"Location mismatch (Was A)","state":"Updated"},{"sheet_id":"WS-30D-0104","asset_id":"ITA-00604","serial":"SN-HP-100004","zone":"Bangalore - Block B (Flr 3)","auditor":"Ananya Roy","scan_time":"2024-10-20 11:41","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0105","asset_id":"ITA-00605","serial":"SN-LEN-100005","zone":"Bangalore - Block B (Flr 4)","auditor":"Tajammul Farooq","scan_time":"2024-10-19 14:15","discrepancy":"User transferred","state":"Pending Approval"},{"sheet_id":"WS-30D-0106","asset_id":"ITA-00606","serial":"SN-DEL-100006","zone":"Bangalore - Block A (Flr 1)","auditor":"Tajammul Farooq","scan_time":"2024-10-19 14:22","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0107","asset_id":"ITA-00607","serial":"SN-APP-100007","zone":"Mumbai Office - Bay 2","auditor":"Vikram Sethi","scan_time":"2024-10-18 10:05","discrepancy":"Barcode faded (Replaced)","state":"Re-tagged"},{"sheet_id":"WS-30D-0108","asset_id":"ITA-00608","serial":"SN-DEL-100008","zone":"Bangalore DC - Rack 04","auditor":"Rahul Verma","scan_time":"2024-10-17 16:50","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0109","asset_id":"ITA-00609","serial":"SN-HP-100009","zone":"Delhi Hub - Flr 1","auditor":"Pooja Nair","scan_time":"2024-10-16 09:40","discrepancy":"None (Matched)","state":"Reconciled"},{"sheet_id":"WS-30D-0110","asset_id":"ITA-00610","serial":"SN-CIS-100010","zone":"Bangalore DC - Rack 01","auditor":"Rahul Verma","scan_time":"2024-10-15 15:10","discrepancy":"None (Matched)","state":"Reconciled"}]},"software-licences":{"title":"Software Licences","docType":"Software License","description":"Volume enterprise agreements, seat counts, allocation ratios, and expiry schedules.","kpis":[{"label":"Total Licences","value":"42","change":"Across 18 vendors","color":"blue"},{"label":"Allocated Seats","value":"1,840","change":"86.8% utilization","color":"emerald"},{"label":"Unallocated Seats","value":"280","change":"Available pool","color":"blue"},{"label":"Annual SaaS Spend","value":"₹64.2L","change":"Contract commitments","color":"amber"}],"columns":[{"key":"id","label":"License ID","sortable":true},{"key":"software","label":"Software Suite","sortable":true},{"key":"publisher","label":"Publisher","sortable":true},{"key":"type","label":"License Model","sortable":true},{"key":"total_seats","label":"Total Seats","sortable":true},{"key":"used_seats","label":"Assigned Seats","sortable":true},{"key":"expiry","label":"Expiry Date","sortable":true},{"key":"status","label":"Compliance Status","sortable":true}],"rows":[{"id":"LIC-2024-001","software":"Microsoft 365 E5 Enterprise","publisher":"Microsoft","type":"Per User / Monthly","total_seats":"650","used_seats":"624","expiry":"2025-06-30","status":"Compliant"},{"id":"LIC-2024-002","software":"Adobe Creative Cloud All Apps","publisher":"Adobe Inc.","type":"Named User","total_seats":"85","used_seats":"82","expiry":"2025-03-31","status":"Compliant"},{"id":"LIC-2024-003","software":"GitHub Enterprise Cloud","publisher":"GitHub / MS","type":"Per Seat / Annual","total_seats":"140","used_seats":"145","expiry":"2025-04-15","status":"Over-allocated"},{"id":"LIC-2024-004","software":"Slack Enterprise Grid","publisher":"Salesforce","type":"Per User / Annual","total_seats":"700","used_seats":"688","expiry":"2025-08-31","status":"Compliant"},{"id":"LIC-2024-005","software":"Figma Organization","publisher":"Figma","type":"Editor Seat","total_seats":"60","used_seats":"58","expiry":"2025-05-30","status":"Compliant"},{"id":"LIC-2024-006","software":"Zoom Workplace Enterprise","publisher":"Zoom Video","type":"Named Host","total_seats":"200","used_seats":"164","expiry":"2025-02-28","status":"Compliant"},{"id":"LIC-2024-007","software":"Datadog APM & Infrastructure","publisher":"Datadog","type":"Host Unit","total_seats":"50","used_seats":"46","expiry":"2025-01-31","status":"Compliant"},{"id":"LIC-2024-008","software":"CrowdStrike Falcon Enterprise","publisher":"CrowdStrike","type":"Per Endpoint","total_seats":"550","used_seats":"516","expiry":"2025-07-31","status":"Compliant"},{"id":"LIC-2024-009","software":"JetBrains All Products Pack","publisher":"JetBrains","type":"Commercial Seat","total_seats":"75","used_seats":"70","expiry":"2024-12-15","status":"Renewal Pending"},{"id":"LIC-2024-010","software":"Atlassian Jira Software Cloud","publisher":"Atlassian","type":"Tiered User","total_seats":"300","used_seats":"292","expiry":"2025-09-30","status":"Compliant"}]},"devices-by-software":{"title":"Devices by Software","description":"Endpoint application mappings detected via GLPI Agent, Intune MDM, and Entra SSO.","kpis":[{"label":"Tracked Packages","value":"156","change":"Curated catalog","color":"blue"},{"label":"Managed Endpoints","value":"492","change":"Windows, Mac & Linux","color":"blue"},{"label":"Outdated Builds","value":"34","change":"Patches scheduled","color":"amber"},{"label":"Discovery Health","value":"99.2%","change":"Last run 12m ago","color":"emerald"}],"columns":[{"key":"pkg_id","label":"Package ID","sortable":true},{"key":"app_title","label":"Application Name","sortable":true},{"key":"version","label":"Installed Version","sortable":true},{"key":"device_name","label":"Device Hostname","sortable":true},{"key":"platform","label":"Platform / OS","sortable":true},{"key":"user","label":"Primary User","sortable":true},{"key":"last_detected","label":"Last Detected","sortable":true},{"key":"compliance","label":"Patch State","sortable":true}],"rows":[{"pkg_id":"PKG-001","app_title":"Microsoft 365 Apps for Enterprise","version":"16.0.17830.20138","device_name":"blr-lap-05.internal.corp","platform":"Windows 11 Enterprise","user":"ananya.roy@proficientnow.com","last_detected":"2024-10-21 08:30","compliance":"Current"},{"pkg_id":"PKG-002","app_title":"CrowdStrike Falcon Sensor","version":"7.14.18305.0","device_name":"blr-lap-05.internal.corp","platform":"Windows 11 Enterprise","user":"ananya.roy@proficientnow.com","last_detected":"2024-10-21 08:30","compliance":"Current"},{"pkg_id":"PKG-003","app_title":"Docker Desktop","version":"4.34.2","device_name":"blr-lap-06.internal.corp","platform":"macOS Sonoma 14.6","user":"shashim@proficientnow.com","last_detected":"2024-10-21 07:15","compliance":"Current"},{"pkg_id":"PKG-004","app_title":"Google Chrome Enterprise","version":"130.0.6723.59","device_name":"blr-lap-06.internal.corp","platform":"macOS Sonoma 14.6","user":"shashim@proficientnow.com","last_detected":"2024-10-21 07:15","compliance":"Current"},{"pkg_id":"PKG-005","app_title":"Slack Desktop Client","version":"4.40.127","device_name":"blr-lap-07.internal.corp","platform":"macOS Sonoma 14.5","user":"vsethi@proficientnow.com","last_detected":"2024-10-20 18:20","compliance":"Update Available"},{"pkg_id":"PKG-006","app_title":"IntelliJ IDEA Ultimate","version":"2024.2.3","device_name":"blr-lap-07.internal.corp","platform":"macOS Sonoma 14.5","user":"vsethi@proficientnow.com","last_detected":"2024-10-20 18:20","compliance":"Current"},{"pkg_id":"PKG-007","app_title":"OpenVPN Connect","version":"3.4.4","device_name":"del-lap-09.internal.corp","platform":"Windows 11 Enterprise","user":"pnair@proficientnow.com","last_detected":"2024-10-20 16:10","compliance":"Current"},{"pkg_id":"PKG-008","app_title":"7-Zip File Archiver","version":"24.08","device_name":"del-lap-09.internal.corp","platform":"Windows 11 Enterprise","user":"pnair@proficientnow.com","last_detected":"2024-10-20 16:10","compliance":"Current"},{"pkg_id":"PKG-009","app_title":"Python 3 Runtime","version":"3.11.8","device_name":"blr-srv-08.internal.corp","platform":"Ubuntu 22.04 LTS","user":"system.service","last_detected":"2024-10-20 12:00","compliance":"Current"},{"pkg_id":"PKG-010","app_title":"PostgreSQL Client Tools","version":"16.4","device_name":"blr-srv-08.internal.corp","platform":"Ubuntu 22.04 LTS","user":"system.service","last_detected":"2024-10-20 12:00","compliance":"Current"},{"pkg_id":"PKG-011","app_title":"Visual Studio Code","version":"1.94.2","device_name":"blr-lap-11.internal.corp","platform":"Windows 11 Enterprise","user":"tfarooq@proficientnow.com","last_detected":"2024-10-19 14:00","compliance":"Current"},{"pkg_id":"PKG-012","app_title":"Zoom Meetings Client","version":"6.2.3","device_name":"blr-lap-11.internal.corp","platform":"Windows 11 Enterprise","user":"tfarooq@proficientnow.com","last_detected":"2024-10-19 14:00","compliance":"Current"}]},"licence-compliance":{"title":"Licence Compliance","description":"Variance analysis comparing contractual license entitlements against real endpoint installations.","kpis":[{"label":"Fully Compliant","value":"28","change":"Within safe margins","color":"emerald"},{"label":"Over-allocated","value":"4","change":"Requires seat purchase","color":"red"},{"label":"Under-utilized","value":"9","change":"Savings opportunity","color":"amber"},{"label":"True-up Exposure","value":"₹4.2L","change":"Audit estimate","color":"red"}],"columns":[{"key":"product","label":"Licensed Product","sortable":true},{"key":"publisher","label":"Publisher","sortable":true},{"key":"entitled","label":"Entitled Seats","sortable":true},{"key":"detected","label":"Active Installs","sortable":true},{"key":"variance","label":"Seat Variance","sortable":true},{"key":"exposure","label":"Cost Exposure","sortable":true},{"key":"risk_level","label":"Risk Rating","sortable":true},{"key":"action","label":"Recommended Action","sortable":false}],"rows":[{"product":"GitHub Enterprise Cloud","publisher":"Microsoft","entitled":"140","detected":"145","variance":"+5 (Deficit)","exposure":"₹1,05,000","risk_level":"High","action":"Procure 5 additional seats via CSP"},{"product":"Adobe Creative Cloud","publisher":"Adobe","entitled":"85","detected":"88","variance":"+3 (Deficit)","exposure":"₹1,80,000","risk_level":"High","action":"Reclaim unused seats or buy licenses"},{"product":"JetBrains All Products Pack","publisher":"JetBrains","entitled":"75","detected":"77","variance":"+2 (Deficit)","exposure":"₹84,000","risk_level":"Medium","action":"Reassign 2 idle licenses"},{"product":"Figma Organization","publisher":"Figma","entitled":"60","detected":"62","variance":"+2 (Deficit)","exposure":"₹55,000","risk_level":"Medium","action":"Convert 2 users to Viewer-Restricted"},{"product":"Microsoft 365 E5","publisher":"Microsoft","entitled":"650","detected":"624","variance":"-26 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Pool reserved for onboarding"},{"product":"Slack Enterprise Grid","publisher":"Salesforce","entitled":"700","detected":"688","variance":"-12 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Sufficient buffer maintained"},{"product":"CrowdStrike Falcon","publisher":"CrowdStrike","entitled":"550","detected":"516","variance":"-34 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Buffer for new laptop shipments"},{"product":"Zoom Workplace","publisher":"Zoom Video","entitled":"200","detected":"164","variance":"-36 (Surplus)","exposure":"₹0 (Safe)","risk_level":"Low","action":"Consider downsizing on next renewal"}]},"prohibited-software":{"title":"Prohibited Software","description":"Blacklisted executables, unapproved VPNs, peer-to-peer clients, and security policy violations.","kpis":[{"label":"Active Alerts","value":"6","change":"Policy violations","color":"red"},{"label":"High Severity","value":"3","change":"Immediate isolate","color":"red"},{"label":"Isolated Devices","value":"2","change":"Network restricted","color":"amber"},{"label":"Remediated YTD","value":"41","change":"Cleaned successfully","color":"emerald"}],"columns":[{"key":"alert_id","label":"Alert ID","sortable":true},{"key":"app_name","label":"Prohibited Software","sortable":true},{"key":"category","label":"Risk Category","sortable":true},{"key":"device","label":"Endpoint Device","sortable":true},{"key":"user","label":"Logged-in User","sortable":true},{"key":"detected_at","label":"Detection Date","sortable":true},{"key":"severity","label":"Severity","sortable":true},{"key":"status","label":"Containment","sortable":true}],"rows":[{"alert_id":"SEC-PRO-081","app_name":"BitTorrent Client v7.10","category":"P2P File Sharing","device":"blr-lap-44.internal.corp","user":"karan.j@proficientnow.com","detected_at":"2024-10-21 08:14","severity":"High","status":"Process Blocked"},{"alert_id":"SEC-PRO-080","app_name":"NordVPN Consumer Client","category":"Unapproved VPN / Tunnel","device":"del-lap-19.internal.corp","user":"amrita.s@proficientnow.com","detected_at":"2024-10-20 19:40","severity":"High","status":"Quarantined"},{"alert_id":"SEC-PRO-079","app_name":"CCleaner Free Utility","category":"Unvetted Registry Cleaner","device":"blr-lap-29.internal.corp","user":"rahul.t@proficientnow.com","detected_at":"2024-10-20 11:25","severity":"Medium","status":"Pending Removal"},{"alert_id":"SEC-PRO-078","app_name":"AnyDesk Remote Desktop","category":"Shadow Remote Access","device":"mum-lap-08.internal.corp","user":"deepak.v@proficientnow.com","detected_at":"2024-10-19 14:50","severity":"High","status":"Port Blocked"},{"alert_id":"SEC-PRO-077","app_name":"uTorrent Web Installer","category":"P2P File Sharing","device":"blr-lap-52.internal.corp","user":"neha.k@proficientnow.com","detected_at":"2024-10-18 16:30","severity":"High","status":"Quarantined"},{"alert_id":"SEC-PRO-076","app_name":"WireShark Portable","category":"Network Packet Sniffer","device":"blr-lap-12.internal.corp","user":"manish.p@proficientnow.com","detected_at":"2024-10-17 10:15","severity":"Medium","status":"Under Review"},{"alert_id":"SEC-PRO-075","app_name":"Cheat Engine Memory Mod","category":"Process Injection Tool","device":"blr-lap-88.internal.corp","user":"siddharth.m@proficientnow.com","detected_at":"2024-10-15 13:00","severity":"Critical","status":"Isolated"},{"alert_id":"SEC-PRO-074","app_name":"Telegram Desktop (Direct .exe)","category":"Unapproved Messaging App","device":"del-lap-22.internal.corp","user":"priya.g@proficientnow.com","detected_at":"2024-10-14 17:45","severity":"Low","status":"User Warned"}]},"software-cross-check":{"title":"Software Cross-Check","description":"Multi-source reconciliation comparing GLPI agent inventory against Microsoft Intune MDM & Entra ID.","kpis":[{"label":"Reconciled Endpoints","value":"380","change":"Cross-verified","color":"blue"},{"label":"Full Source Matches","value":"352","change":"92.6% parity","color":"emerald"},{"label":"Identified Discrepancies","value":"28","change":"Resolution underway","color":"amber"},{"label":"Discovery Latency","value":"< 5m","change":"Real-time telemetry","color":"blue"}],"columns":[{"key":"tag","label":"Device Tag","sortable":true},{"key":"app","label":"Target Software","sortable":true},{"key":"glpi","label":"GLPI Agent Scan","sortable":true},{"key":"intune","label":"Intune MDM Scan","sortable":true},{"key":"entra","label":"Entra SSO Activity","sortable":true},{"key":"delta","label":"Discrepancy Detail","sortable":false},{"key":"action","label":"Resolution Path","sortable":true}],"rows":[{"tag":"ITA-00605","app":"Microsoft 365 Enterprise","glpi":"v16.0.17830 (Installed)","intune":"Compliant Build","entra":"Active Sign-in (Today)","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00606","app":"CrowdStrike Falcon Sensor","glpi":"v7.14 (Active)","intune":"Installed","entra":"N/A (Agent)","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00607","app":"Adobe Creative Cloud","glpi":"Not Detected","intune":"Not Managed","entra":"Active Token (Yesterday)","delta":"Browser SSO without local install","action":"Assign Local App"},{"tag":"ITA-00608","app":"Docker Desktop Pro","glpi":"v4.34.2 (Installed)","intune":"Policy Enforced","entra":"SSO Confirmed","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00609","app":"Slack Desktop Client","glpi":"v4.38.11 (Outdated)","intune":"Update Required","entra":"Active Sign-in","delta":"Version mismatch with policy baseline","action":"Push Intune Patch"},{"tag":"ITA-00610","app":"Zoom Meetings Client","glpi":"v6.2.3 (Installed)","intune":"Compliant Build","entra":"Active Sign-in","delta":"Full Parity","action":"Synchronized"},{"tag":"ITA-00611","app":"Figma Desktop","glpi":"Installed","intune":"Not Monitored","entra":"Active Sign-in","delta":"Intune catalog missing package definition","action":"Catalog Ingestion"},{"tag":"ITA-00612","app":"JetBrains IntelliJ IDEA","glpi":"v2024.2.3","intune":"Compliant","entra":"SSO Confirmed","delta":"Full Parity","action":"Synchronized"}]},"saas-renewal-watch":{"title":"SaaS Renewal Watch","description":"Upcoming cloud subscriptions, termination notice periods, pricing reviews, and auto-renew dates.","kpis":[{"label":"Renewals (Next 60d)","value":"5","change":"Negotiation window open","color":"amber"},{"label":"Monthly Run Rate","value":"₹12.8L","change":"Cloud spend","color":"blue"},{"label":"Potential Savings","value":"₹3.4L","change":"Idle seat reclamation","color":"emerald"},{"label":"Auto-Renew Active","value":"18","change":"Notice required","color":"amber"}],"columns":[{"key":"service","label":"SaaS Service","sortable":true},{"key":"vendor","label":"Vendor / Provider","sortable":true},{"key":"owner","label":"Internal Owner","sortable":true},{"key":"cadence","label":"Billing Cadence","sortable":true},{"key":"renewal_date","label":"Renewal Date","sortable":true},{"key":"notice_window","label":"Notice Period","sortable":true},{"key":"cost","label":"Cost / Cycle","sortable":true},{"key":"status","label":"Action State","sortable":true}],"rows":[{"service":"JetBrains All Products Pack","vendor":"JetBrains s.r.o.","owner":"Vikram Sethi (Eng)","cadence":"Annual","renewal_date":"2024-12-15","notice_window":"30 days before","cost":"₹6,40,000","status":"In Review"},{"service":"Datadog Cloud Monitoring","vendor":"Datadog Inc.","owner":"Rahul Verma (DevOps)","cadence":"Annual","renewal_date":"2025-01-31","notice_window":"45 days before","cost":"₹14,50,000","status":"Pricing RFP"},{"service":"Zoom Workplace Enterprise","vendor":"Zoom Video Comm.","owner":"Tajammul Farooq (IT)","cadence":"Annual","renewal_date":"2025-02-28","notice_window":"30 days before","cost":"₹8,20,000","status":"Downsize Review"},{"service":"Adobe Creative Cloud","vendor":"Adobe Inc.","owner":"Ananya Roy (Design)","cadence":"Annual","renewal_date":"2025-03-31","notice_window":"30 days before","cost":"₹11,40,000","status":"Scheduled"},{"service":"GitHub Enterprise Cloud","vendor":"Microsoft GitHub","owner":"Syed Hashim (IT)","cadence":"Annual","renewal_date":"2025-04-15","notice_window":"60 days before","cost":"₹18,50,000","status":"Scheduled"},{"service":"Figma Organization","vendor":"Figma Inc.","owner":"Ananya Roy (Design)","cadence":"Annual","renewal_date":"2025-05-30","notice_window":"30 days before","cost":"₹7,80,000","status":"Active"},{"service":"Microsoft 365 E5","vendor":"Microsoft Corp.","owner":"Syed Hashim (IT)","cadence":"Annual","renewal_date":"2025-06-30","notice_window":"60 days before","cost":"₹42,00,000","status":"Active"},{"service":"Slack Enterprise Grid","vendor":"Salesforce.com","owner":"Syed Hashim (IT)","cadence":"Annual","renewal_date":"2025-08-31","notice_window":"60 days before","cost":"₹16,20,000","status":"Active"}]},"identity-access":{"title":"Identity & Access","description":"Microsoft Entra ID directory accounts, privileged administrator roles, and MFA security status.","kpis":[{"label":"Synchronized Users","value":"2,410","change":"Directory active","color":"blue"},{"label":"Privileged Admins","value":"14","change":"PIM enforced","color":"blue"},{"label":"Orphaned Accounts","value":"3","change":"Flagged for removal","color":"red"},{"label":"MFA Enforced Rate","value":"98.9%","change":"Conditional Access","color":"emerald"}],"columns":[{"key":"upn","label":"Account (UPN)","sortable":true},{"key":"name","label":"Display Name","sortable":true},{"key":"department","label":"Department","sortable":true},{"key":"title","label":"Job Title","sortable":true},{"key":"role","label":"Role Level","sortable":true},{"key":"mfa","label":"MFA Posture","sortable":true},{"key":"last_login","label":"Last Login","sortable":true},{"key":"status","label":"Account State","sortable":true}],"rows":[{"upn":"shashim@proficientnow.com","name":"Syed Hashim","department":"IT & Infrastructure","title":"Senior IT Systems Manager","role":"Global Admin (PIM)","mfa":"FIDO2 / MS Authenticator","last_login":"Today, 09:14 AM","status":"Active"},{"upn":"ananya.roy@proficientnow.com","name":"Ananya Roy","department":"IT Operations","title":"IT Asset & Logistics Lead","role":"Asset Admin","mfa":"MS Authenticator","last_login":"Today, 08:45 AM","status":"Active"},{"upn":"tfarooq@proficientnow.com","name":"Tajammul Farooq","department":"IT Support","title":"Lead Systems Administrator","role":"Helpdesk Admin","mfa":"MS Authenticator","last_login":"Today, 08:50 AM","status":"Active"},{"upn":"vsethi@proficientnow.com","name":"Vikram Sethi","department":"Engineering","title":"Principal Architect","role":"User","mfa":"MS Authenticator","last_login":"Today, 09:02 AM","status":"Active"},{"upn":"pnair@proficientnow.com","name":"Pooja Nair","department":"Information Security","title":"Lead InfoSec & Compliance","role":"Security Admin","mfa":"FIDO2 Hardware Key","last_login":"Today, 07:30 AM","status":"Active"},{"upn":"rverma@proficientnow.com","name":"Rahul Verma","department":"Cloud Platform","title":"Cloud DevOps Specialist","role":"Cloud App Admin","mfa":"MS Authenticator","last_login":"Yesterday, 11:20 PM","status":"Active"},{"upn":"contractor.guest@proficientnow.com","name":"External Contractor 01","department":"Contractors","title":"Front-end Consultant","role":"Guest User","mfa":"SMS OTP (Non-compliant)","last_login":"14 days ago","status":"Needs Review"},{"upn":"ex.employee@proficientnow.com","name":"Former Employee Archive","department":"Finance (Ex)","title":"Accounts Officer","role":"User (Disabled)","mfa":"Disabled","last_login":"92 days ago","status":"Orphan Flagged"}]},"exceptions":{"title":"Exceptions","description":"Hardware and software exceptions: unassigned hardware, missing serials, IP conflicts, or orphan CIs.","kpis":[{"label":"Active Exceptions","value":"34","change":"8 critical severity","color":"red"},{"label":"Unassigned Hardware","value":"12","change":"In storage rooms","color":"amber"},{"label":"Missing Primary IP","value":"7","change":"Agent sync required","color":"red"},{"label":"Auto-Resolvable","value":"15","change":"Ready for batch fix","color":"blue"}],"subFilters":["All","Unassigned Hardware","Expired Warranty","Missing Primary IP","Duplicate Serial"],"columns":[{"key":"id","label":"Exception ID","sortable":true},{"key":"ci_tag","label":"CI Tag","sortable":true},{"key":"category","label":"Exception Category","sortable":true},{"key":"severity","label":"Severity","sortable":true},{"key":"root_cause","label":"Root Cause Summary","sortable":false},{"key":"detected_date","label":"Detected Date","sortable":true},{"key":"assignee","label":"Assigned Engineer","sortable":true},{"key":"status","label":"Status","sortable":true}],"rows":[{"id":"EXC-2024-041","ci_tag":"ITA-00621","category":"Unassigned Hardware","severity":"Medium","root_cause":"Dell Latitude 5440 in Bangalore Storage without assigned custodian","detected_date":"2024-10-20","assignee":"Ananya Roy","status":"Open"},{"id":"EXC-2024-042","ci_tag":"ITA-00622","category":"Missing Primary IP","severity":"High","root_cause":"Rack server responding to ICMP but primary_ip field is null","detected_date":"2024-10-20","assignee":"Rahul Verma","status":"In Progress"},{"id":"EXC-2024-043","ci_tag":"ITA-00512","category":"Expired Warranty","severity":"High","root_cause":"Warranty terminated on 2024-10-14 without extended support PO","detected_date":"2024-10-19","assignee":"Syed Hashim","status":"Escalated"},{"id":"EXC-2024-044","ci_tag":"ITA-00630","category":"Duplicate Serial","severity":"Critical","root_cause":"Serial number SN-DEL-991820 registered on two separate CI records","detected_date":"2024-10-18","assignee":"Syed Hashim","status":"Investigating"},{"id":"EXC-2024-045","ci_tag":"ITA-00634","category":"Unassigned Hardware","severity":"Low","root_cause":"HP Wireless Mouse unlinked from host PC after docking station swap","detected_date":"2024-10-17","assignee":"Tajammul Farooq","status":"Open"},{"id":"EXC-2024-046","ci_tag":"ITA-00638","category":"Missing Primary IP","severity":"Medium","root_cause":"Network printer on DHCP without fixed IP reservation","detected_date":"2024-10-16","assignee":"Tajammul Farooq","status":"Pending Config"},{"id":"EXC-2024-047","ci_tag":"ITA-00518","category":"Expired Warranty","severity":"Medium","root_cause":"Lenovo Premier support lapsed 7 days ago","detected_date":"2024-10-15","assignee":"Ananya Roy","status":"PO In Process"},{"id":"EXC-2024-048","ci_tag":"ITA-00642","category":"Duplicate Serial","severity":"Critical","root_cause":"Cisco SFP module serial duplicated across switch stack ports","detected_date":"2024-10-14","assignee":"Rahul Verma","status":"Open"}]},"ticket-queue":{"title":"Ticket Queue","description":"Service desk incidents, asset provisioning requests, repair dispatches, and CMDB tasks.","kpis":[{"label":"Open Work Orders","value":"22","change":"8 high priority","color":"red"},{"label":"SLA At Risk","value":"3","change":"< 2 hours left","color":"red"},{"label":"Resolved Today","value":"15","change":"Average resolution 2.4h","color":"emerald"},{"label":"First Contact Fix","value":"91.2%","change":"+3.4% this month","color":"emerald"}],"columns":[{"key":"ticket_id","label":"Ticket ID","sortable":true},{"key":"subject","label":"Request Summary","sortable":true},{"key":"requester","label":"Requester","sortable":true},{"key":"priority","label":"Priority","sortable":true},{"key":"category","label":"Category","sortable":true},{"key":"assigned_to","label":"Assigned Engineer","sortable":true},{"key":"created","label":"Logged At","sortable":true},{"key":"status","label":"Ticket Status","sortable":true}],"rows":[{"ticket_id":"INC-2024-1092","subject":"Laptop display flickering on Dell Latitude 5440","requester":"Kavita Menon","priority":"High","category":"Hardware Repair","assigned_to":"Tajammul Farooq","created":"2024-10-21 09:20","status":"In Progress"},{"ticket_id":"REQ-2024-0841","subject":"New hire onboarding hardware bundle (MacBook Pro + Peripheral)","requester":"HR Operations","priority":"Medium","category":"Asset Provisioning","assigned_to":"Ananya Roy","created":"2024-10-21 08:45","status":"Pending Approval"},{"ticket_id":"INC-2024-1091","subject":"Unable to connect to Bangalore DC VPN gateway","requester":"Amit Shinde","priority":"Urgent","category":"Network & Access","assigned_to":"Rahul Verma","created":"2024-10-21 08:30","status":"Assigned"},{"ticket_id":"REQ-2024-0840","subject":"Additional 27\" 4K Monitor request for Design Team","requester":"Sanjay Dutt","priority":"Low","category":"Peripheral Request","assigned_to":"Ananya Roy","created":"2024-10-20 17:15","status":"Scheduled"},{"ticket_id":"INC-2024-1090","subject":"Wireless keyboard battery compartment loose","requester":"Deepa Krishnan","priority":"Low","category":"Peripheral Swap","assigned_to":"Tajammul Farooq","created":"2024-10-20 15:40","status":"Resolved"},{"ticket_id":"REQ-2024-0839","subject":"GitHub Enterprise seat allocation for Mobile Team","requester":"Vikram Sethi","priority":"Medium","category":"Software Entitlement","assigned_to":"Syed Hashim","created":"2024-10-20 14:10","status":"Completed"},{"ticket_id":"INC-2024-1089","subject":"CrowdStrike Falcon Sensor flagging development binary","requester":"Rohan Mehra","priority":"High","category":"Security False Positive","assigned_to":"Pooja Nair","created":"2024-10-20 11:30","status":"In Progress"},{"ticket_id":"REQ-2024-0838","subject":"Asset transfer sign-off from Dev Lab to QA Stage","requester":"Nisha Gupta","priority":"Low","category":"CMDB Custody Change","assigned_to":"Ananya Roy","created":"2024-10-19 16:20","status":"Resolved"},{"ticket_id":"INC-2024-1088","subject":"Bangalore Block B Floor 3 Network Switch port dead","requester":"Facilities Dept","priority":"High","category":"Infrastructure","assigned_to":"Rahul Verma","created":"2024-10-19 13:00","status":"Resolved"},{"ticket_id":"REQ-2024-0837","subject":"Decommissioning and safe disposal of 4 legacy servers","requester":"IT Asset Admin","priority":"Medium","category":"Disposal & Recycling","assigned_to":"Syed Hashim","created":"2024-10-18 10:45","status":"In Progress"}]}};
 
     function appData() {
       return {
@@ -1745,6 +2095,12 @@
         currentPage: 1,
         pageSize: 20,
         selectedRowIds: [],
+        activeRowMenuId: null,
+        deleteModalOpen: false,
+        deleteTargetRecord: null,
+        deleteTargetReportRow: null,
+        deleteModalType: 'it-asset',
+        deleteIsBulk: false,
         isColumnsCustomized: false,
 
         // Reports state
@@ -1754,6 +2110,8 @@
         reportSortColumn: '',
         reportSortAsc: true,
         selectedReportRow: null,
+        selectedReportRowIds: [],
+        activeReportRowMenuId: null,
         activeSubFilter: 'All',
 
         allFields: [
@@ -1792,6 +2150,13 @@
         selectedInAvailable: [],
         selectedInChosen: [],
         columnSearchQuery: '',
+
+        // Drag & Drop State for Slashbucket
+        draggedSource: null,        // 'available' | 'selected' | 'filter-available' | 'filter-selected'
+        draggedKey: null,           // field or value key
+        draggedIndex: null,         // source index in draftSelectedColumns
+        dragOverTargetIndex: null,  // hovered index in draftSelectedColumns
+        dragOverBucket: null,       // 'available' | 'selected' | 'filter-available' | 'filter-selected'
 
         formTabs: [
           { id: 'identity', label: 'Identity', count: 8 },
@@ -1854,6 +2219,8 @@
           this.reportSortColumn = '';
           this.reportSortAsc = true;
           this.selectedReportRow = null;
+          this.selectedReportRowIds = [];
+          this.activeReportRowMenuId = null;
           this.activeSubFilter = 'All';
           this.setView('report');
         },
@@ -1900,6 +2267,101 @@
           }
         },
 
+        getKpiCardClass(kpi) {
+          const c = kpi?.color || this.resolveKpiColor(kpi);
+          switch (c) {
+            case 'red':
+              return 'border-t-4 border-red-500 bg-red-50';
+            case 'amber':
+            case 'orange':
+              return 'border-t-4 border-amber-500 bg-amber-50';
+            case 'emerald':
+            case 'green':
+              return 'border-t-4 border-emerald-500 bg-emerald-50';
+            case 'blue':
+            case 'slate':
+            default:
+              return 'border-t-4 border-blue-500 bg-blue-50';
+          }
+        },
+
+        resolveKpiColor(kpi) {
+          if (!kpi) return 'blue';
+          const text = ((kpi.label || '') + ' ' + (kpi.change || '')).toLowerCase();
+          if (/overdue|critical|open work|at risk|high severity|discrepanc|missing primary|orphaned|true-up|repairs logged/i.test(text)) {
+            return 'red';
+          }
+          if (/expiring|due this month|due soon|days remaining|unassigned|renewals|under-utilized|outdated|custody|auto-renew|spend/i.test(text)) {
+            return 'amber';
+          }
+          if (/compliant|parity|positive|on track|verified|reconciled|full source|savings|auto-logged|active vendors|reconciliation rate|discovery health|first contact|allocated|remediated|mfa/i.test(text)) {
+            return 'emerald';
+          }
+          return 'blue';
+        },
+
+        getKpiSignType(kpi) {
+          const color = kpi?.color || this.resolveKpiColor(kpi);
+          if (color === 'red') return 'critical';
+          if (color === 'amber' || color === 'orange') return 'warning';
+          if (color === 'emerald' || color === 'green') return 'good';
+          return 'info';
+        },
+
+        getKpiSignLabel(kpi) {
+          const text = ((kpi?.label || '') + ' ' + (kpi?.change || '')).toLowerCase();
+          const color = kpi?.color || this.resolveKpiColor(kpi);
+
+          if (color === 'red') {
+            if (/high severity/i.test(text)) return 'High Severity';
+            if (/critical/i.test(text)) return 'Critical';
+            if (/alert/i.test(text)) return 'Active Alert';
+            if (/overdue/i.test(text)) return 'Overdue';
+            if (/at risk/i.test(text)) return 'SLA At Risk';
+            if (/open work/i.test(text)) return 'Action Req.';
+            if (/discrepanc/i.test(text)) return 'Discrepancy';
+            if (/true-up|over-allocated/i.test(text)) return 'Compliance Risk';
+            if (/missing primary/i.test(text)) return 'Missing IP';
+            if (/orphaned/i.test(text)) return 'Orphan';
+            if (/repairs/i.test(text)) return 'In Repair';
+            return 'Warning';
+          }
+
+          if (color === 'amber' || color === 'orange') {
+            if (/expiring|due/i.test(text)) return 'Due Soon';
+            if (/isolated/i.test(text)) return 'Isolated';
+            if (/unassigned/i.test(text)) return 'Attention';
+            if (/outdated/i.test(text)) return 'Patch Due';
+            if (/discrepanc/i.test(text)) return 'Attention';
+            if (/spend/i.test(text)) return 'Review';
+            if (/custody/i.test(text)) return 'Pending';
+            if (/renewals|auto-renew/i.test(text)) return 'Notice Due';
+            if (/under-utilized/i.test(text)) return 'Optimize';
+            return 'Warning';
+          }
+
+          if (color === 'emerald' || color === 'green') {
+            if (/compliant/i.test(text)) return 'Compliant';
+            if (/verified|reconciled/i.test(text)) return 'Verified';
+            if (/savings/i.test(text)) return 'Savings';
+            if (/remediated/i.test(text)) return 'Remediated';
+            if (/healthy/i.test(text)) return 'Healthy';
+            return 'Normal';
+          }
+
+          return 'Metric';
+        },
+
+        isWarningOrSeverityStatus(s) {
+          if (!s) return false;
+          return /critical|high|urgent|overdue|isolated|deficit|quarantined|blocked|risk|warning|medium|in repair|pending removal|alert|needs review|quote received|renewal pending|under review|pending approval|pending config|po in process|update available|investigating|non-compliant|at risk|pending disposal/i.test(String(s));
+        },
+
+        isCriticalSeverityStatus(s) {
+          if (!s) return false;
+          return /critical|high|urgent|overdue|isolated|deficit|quarantined|blocked|alert|investigating|non-compliant/i.test(String(s));
+        },
+
         openReportRowDetail(row) {
           this.selectedReportRow = row;
           this.$nextTick(() => { this.renderIcons(); });
@@ -1934,6 +2396,7 @@
         },
 
         openRecordForm(rec) {
+          this.activeRowMenuId = null;
           this.currentRecord = JSON.parse(JSON.stringify(rec));
           this.isFormDirty = false;
           this.activeFormTab = 'identity';
@@ -2230,6 +2693,162 @@
           this.$nextTick(() => { this.renderIcons(); });
         },
 
+        // ==========================================
+        // SLASHBUCKET DRAG & DROP HANDLERS
+        // ==========================================
+        onDragStartAvailable(e, key) {
+          this.draggedSource = 'available';
+          this.draggedKey = key;
+          this.draggedIndex = null;
+          this.dragOverBucket = null;
+          this.dragOverTargetIndex = null;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'copyMove';
+            e.dataTransfer.setData('text/plain', key);
+          }
+        },
+
+        onDragStartSelected(e, key, index) {
+          if (key === 'asset_name') {
+            e.preventDefault();
+            return;
+          }
+          this.draggedSource = 'selected';
+          this.draggedKey = key;
+          this.draggedIndex = index;
+          this.dragOverBucket = null;
+          this.dragOverTargetIndex = null;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', key);
+          }
+        },
+
+        onDragOverColumnItem(e, index) {
+          this.dragOverBucket = 'selected';
+          // Cannot drop before locked asset_name at index 0
+          this.dragOverTargetIndex = Math.max(1, index);
+          if (e.dataTransfer) {
+            e.dataTransfer.dropEffect = 'move';
+          }
+        },
+
+        onDragLeaveColumnItem(index) {
+          if (this.dragOverTargetIndex === index) {
+            this.dragOverTargetIndex = null;
+          }
+        },
+
+        onDropOnColumnItem(e, targetIndex) {
+          const safeTarget = Math.max(1, targetIndex);
+
+          if (this.draggedSource === 'selected' && this.draggedKey) {
+            const key = this.draggedKey;
+            if (key === 'asset_name') return;
+            const oldIdx = this.draftSelectedColumns.indexOf(key);
+            if (oldIdx !== -1) {
+              this.draftSelectedColumns.splice(oldIdx, 1);
+              const insertIdx = safeTarget;
+              this.draftSelectedColumns.splice(insertIdx, 0, key);
+              this.selectedInChosen = [key];
+              this.showToast('Reordered: ' + this.getColumnLabel(key) + ' to position ' + (insertIdx + 1), 'info');
+            }
+          } else if (this.draggedSource === 'available' && this.draggedKey) {
+            const key = this.draggedKey;
+            if (!this.draftSelectedColumns.includes(key)) {
+              this.draftSelectedColumns.splice(safeTarget, 0, key);
+              this.selectedInAvailable = this.selectedInAvailable.filter(k => k !== key);
+              this.selectedInChosen = [key];
+              this.showToast('Added column: ' + this.getColumnLabel(key), 'success');
+            }
+          }
+          this.onDragEnd();
+        },
+
+        onDragOverAvailableBucket(e) {
+          this.dragOverBucket = 'available';
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+        },
+
+        onDragLeaveAvailableBucket(e) {
+          if (this.dragOverBucket === 'available') this.dragOverBucket = null;
+        },
+
+        onDropIntoAvailableBucket(e) {
+          if (this.draggedSource === 'selected' && this.draggedKey && this.draggedKey !== 'asset_name') {
+            const key = this.draggedKey;
+            this.moveColumnLeft(key);
+            this.showToast('Removed column: ' + this.getColumnLabel(key), 'info');
+          }
+          this.onDragEnd();
+        },
+
+        onDragOverSelectedBucket(e) {
+          this.dragOverBucket = 'selected';
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'copyMove';
+        },
+
+        onDragLeaveSelectedBucket(e) {
+          if (this.dragOverBucket === 'selected' && this.dragOverTargetIndex === null) {
+            this.dragOverBucket = null;
+          }
+        },
+
+        onDropIntoSelectedBucket(e) {
+          if (this.draggedSource === 'available' && this.draggedKey) {
+            const key = this.draggedKey;
+            if (!this.draftSelectedColumns.includes(key)) {
+              this.draftSelectedColumns.push(key);
+              this.selectedInAvailable = this.selectedInAvailable.filter(k => k !== key);
+              this.selectedInChosen = [key];
+              this.showToast('Added column: ' + this.getColumnLabel(key), 'success');
+            }
+          }
+          this.onDragEnd();
+        },
+
+        // Filter modal drag and drop handlers
+        onDragStartFilterAvailable(e, val) {
+          this.draggedSource = 'filter-available';
+          this.draggedKey = val;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'copyMove';
+            e.dataTransfer.setData('text/plain', val);
+          }
+        },
+
+        onDragStartFilterSelected(e, val, index) {
+          this.draggedSource = 'filter-selected';
+          this.draggedKey = val;
+          this.draggedIndex = index;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', val);
+          }
+        },
+
+        onDropIntoFilterSelected(e) {
+          if (this.draggedSource === 'filter-available' && this.draggedKey) {
+            this.moveFilterValueRight(this.draggedKey);
+          }
+          this.onDragEnd();
+        },
+
+        onDropIntoFilterAvailable(e) {
+          if (this.draggedSource === 'filter-selected' && this.draggedKey) {
+            this.moveFilterValueLeft(this.draggedKey);
+          }
+          this.onDragEnd();
+        },
+
+        onDragEnd() {
+          this.draggedSource = null;
+          this.draggedKey = null;
+          this.draggedIndex = null;
+          this.dragOverTargetIndex = null;
+          this.dragOverBucket = null;
+        },
+
         // Slashbucket filters
         openFilterSlashbucket(target) {
           this.filterModalTarget = target;
@@ -2298,6 +2917,270 @@
           this.showToast('Applied ' + this.filterModalSelectedDraft.length + ' filter values', 'info');
         },
 
+        isColumnHiddenOnMobile(colKey) {
+          return ['assigned_to', 'assigned_to_source', 'compliance', 'lifecycle_review'].includes(colKey);
+        },
+
+        toggleRowMenu(id) {
+          this.activeRowMenuId = (this.activeRowMenuId === id ? null : id);
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        duplicateRecord(rec) {
+          this.activeRowMenuId = null;
+          const newId = 'ITA-' + String(this.records.length + 601).padStart(5, '0');
+          const copy = JSON.parse(JSON.stringify(rec));
+          copy.name = newId;
+          copy.asset_name = copy.asset_name + ' (Copy)';
+          copy.serial_no = 'SN-DUP-' + Date.now().toString().slice(-6);
+          copy.age = 'just now';
+          copy.activities = [
+            { text: 'Duplicated from ' + rec.name + ' by Syed Hashim', time: 'just now' }
+          ];
+          this.records.unshift(copy);
+          this.records = [...this.records];
+          this.showToast('Duplicated ' + rec.name + ' as ' + newId, 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        assignRecordToMe(rec) {
+          this.activeRowMenuId = null;
+          rec.assigned_to = 'Syed Hashim';
+          rec.assigned_employee = 'Syed Hashim (UPN)';
+          rec.assigned_to_source = 'Manual Assignment';
+          const idx = this.records.findIndex(r => r.name === rec.name);
+          if (idx !== -1) {
+            this.records[idx] = { ...rec };
+          }
+          this.records = [...this.records];
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        toggleFavoriteRecord(rec) {
+          this.activeRowMenuId = null;
+          rec.isFavorite = !rec.isFavorite;
+          const idx = this.records.findIndex(r => r.name === rec.name);
+          if (idx !== -1) {
+            this.records[idx] = { ...rec };
+          }
+          this.records = [...this.records];
+          this.showToast('Added to favorites', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        exportSingleRecord(rec) {
+          this.activeRowMenuId = null;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        confirmDeleteRecord(rec) {
+          this.activeRowMenuId = null;
+          this.deleteTargetRecord = rec;
+          this.deleteTargetReportRow = null;
+          this.deleteModalType = 'it-asset';
+          this.deleteIsBulk = false;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        confirmBulkDelete() {
+          if (this.selectedRowIds.length === 0) return;
+          this.deleteTargetRecord = null;
+          this.deleteTargetReportRow = null;
+          this.deleteModalType = 'it-asset';
+          this.deleteIsBulk = true;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        executeDelete() {
+          if (this.deleteModalType === 'it-asset') {
+            if (this.deleteIsBulk) {
+              const count = this.selectedRowIds.length;
+              this.records = this.records.filter(r => !this.selectedRowIds.includes(r.name));
+              this.selectedRowIds = [];
+            } else if (this.deleteTargetRecord) {
+              const targetName = this.deleteTargetRecord.name;
+              this.records = this.records.filter(r => r.name !== targetName);
+              this.selectedRowIds = this.selectedRowIds.filter(id => id !== targetName);
+              this.deleteTargetRecord = null;
+            }
+            this.records = [...this.records];
+          } else if (this.deleteModalType === 'report' && this.currentReport) {
+            if (this.deleteIsBulk) {
+              this.currentReport.rows = (this.currentReport.rows || []).filter(r => !this.selectedReportRowIds.includes(this.getReportRowId(r)));
+              this.selectedReportRowIds = [];
+            } else if (this.deleteTargetReportRow) {
+              const targetId = this.getReportRowId(this.deleteTargetReportRow);
+              this.currentReport.rows = (this.currentReport.rows || []).filter(r => this.getReportRowId(r) !== targetId);
+              this.selectedReportRowIds = this.selectedReportRowIds.filter(id => id !== targetId);
+              this.deleteTargetReportRow = null;
+            }
+            this.currentReport.rows = [...this.currentReport.rows];
+          }
+          this.deleteModalOpen = false;
+          this.showToast('Deleted', 'info');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkAssign() {
+          if (this.selectedRowIds.length === 0) return;
+          this.records.forEach(r => {
+            if (this.selectedRowIds.includes(r.name)) {
+              r.assigned_to = 'Syed Hashim';
+              r.assigned_employee = 'Syed Hashim (UPN)';
+              r.assigned_to_source = 'Bulk Assignment';
+            }
+          });
+          this.records = [...this.records];
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkExport() {
+          if (this.selectedRowIds.length === 0) return;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        // Report row actions (ServiceNow Record Action Row pattern for all reports)
+        getReportRowId(row) {
+          if (!row) return '';
+          return row.id || row.sheet_id || row.pkg_id || row.alert_id || row.ticket_id || row.tag || row.upn || row.service || row.product || '';
+        },
+
+        toggleSelectAllReport(e) {
+          if (e.target.checked) {
+            this.selectedReportRowIds = this.filteredReportRows.map(r => this.getReportRowId(r));
+          } else {
+            this.selectedReportRowIds = [];
+          }
+        },
+
+        get isAllReportSelected() {
+          return this.filteredReportRows.length > 0 && this.filteredReportRows.every(r => this.selectedReportRowIds.includes(this.getReportRowId(r)));
+        },
+
+        toggleReportRowMenu(id) {
+          this.activeReportRowMenuId = (this.activeReportRowMenuId === id ? null : id);
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        duplicateReportRow(row) {
+          this.activeReportRowMenuId = null;
+          if (!this.currentReport || !this.currentReport.rows) return;
+          const copy = JSON.parse(JSON.stringify(row));
+          const id = this.getReportRowId(row);
+          if (copy.id) copy.id = copy.id + '-COPY';
+          else if (copy.sheet_id) copy.sheet_id = copy.sheet_id + '-COPY';
+          else if (copy.pkg_id) copy.pkg_id = copy.pkg_id + '-COPY';
+          else if (copy.alert_id) copy.alert_id = copy.alert_id + '-COPY';
+          else if (copy.ticket_id) copy.ticket_id = copy.ticket_id + '-COPY';
+          else if (copy.tag) copy.tag = copy.tag + '-COPY';
+          else if (copy.service) copy.service = copy.service + ' (Copy)';
+          else if (copy.product) copy.product = copy.product + ' (Copy)';
+          if (copy.asset_name) copy.asset_name += ' (Copy)';
+          if (copy.name) copy.name += ' (Copy)';
+          if (copy.software) copy.software += ' (Copy)';
+          if (copy.subject) copy.subject += ' (Copy)';
+          this.currentReport.rows.unshift(copy);
+          this.currentReport.rows = [...this.currentReport.rows];
+          this.showToast('Duplicated ' + id, 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        assignReportRowToMe(row) {
+          this.activeReportRowMenuId = null;
+          let updated = false;
+          ['custodian', 'assigned_to', 'assignee', 'auditor', 'user', 'owner', 'initiated_by'].forEach(k => {
+            if (row[k] !== undefined) {
+              row[k] = 'Syed Hashim';
+              updated = true;
+            }
+          });
+          if (!updated) {
+            row.assigned_to = 'Syed Hashim';
+          }
+          if (this.currentReport && this.currentReport.rows) {
+            this.currentReport.rows = [...this.currentReport.rows];
+          }
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        toggleFavoriteReportRow(row) {
+          this.activeReportRowMenuId = null;
+          row.isFavorite = !row.isFavorite;
+          if (this.currentReport && this.currentReport.rows) {
+            this.currentReport.rows = [...this.currentReport.rows];
+          }
+          this.showToast('Added to favorites', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        exportReportRow(row) {
+          this.activeReportRowMenuId = null;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        confirmDeleteReportRow(row) {
+          this.activeReportRowMenuId = null;
+          this.deleteTargetReportRow = row;
+          this.deleteTargetRecord = null;
+          this.deleteModalType = 'report';
+          this.deleteIsBulk = false;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        confirmBulkDeleteReport() {
+          if (this.selectedReportRowIds.length === 0) return;
+          this.deleteTargetRecord = null;
+          this.deleteTargetReportRow = null;
+          this.deleteModalType = 'report';
+          this.deleteIsBulk = true;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkAssignReport() {
+          if (this.selectedReportRowIds.length === 0) return;
+          if (!this.currentReport || !this.currentReport.rows) return;
+          this.currentReport.rows.forEach(r => {
+            if (this.selectedReportRowIds.includes(this.getReportRowId(r))) {
+              ['custodian', 'assigned_to', 'assignee', 'auditor', 'user', 'owner'].forEach(k => {
+                if (r[k] !== undefined) r[k] = 'Syed Hashim';
+              });
+              if (!r.custodian && !r.assigned_to && !r.assignee && !r.auditor && !r.user && !r.owner) {
+                r.assigned_to = 'Syed Hashim';
+              }
+            }
+          });
+          this.currentReport.rows = [...this.currentReport.rows];
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkExportReport() {
+          if (this.selectedReportRowIds.length === 0) return;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        getDeleteSummaryText() {
+          if (this.deleteModalType === 'it-asset') {
+            return this.deleteIsBulk ? (this.selectedRowIds.length + ' assets: ' + this.selectedRowIds.join(', ')) : (this.deleteTargetRecord?.name + ' (' + (this.deleteTargetRecord?.asset_name || '') + ')');
+          } else {
+            if (this.deleteIsBulk) {
+              return this.selectedReportRowIds.length + ' records: ' + this.selectedReportRowIds.join(', ');
+            } else if (this.deleteTargetReportRow) {
+              const id = this.getReportRowId(this.deleteTargetReportRow);
+              const name = this.deleteTargetReportRow.asset_name || this.deleteTargetReportRow.name || this.deleteTargetReportRow.software || this.deleteTargetReportRow.subject || '';
+              return id + (name ? ' (' + name + ')' : '');
+            }
+            return '';
+          }
+        },
+
         getStatusPillClass(s) {
           switch (s) {
             case 'Deployed':
@@ -2320,6 +3203,11 @@
             case 'Quote Received':
             case 'Under Review':
             case 'Pending Approval':
+            case 'Pending Removal':
+            case 'Pending Config':
+            case 'PO In Process':
+            case 'Assigned':
+            case 'Update Available':
               return 'bg-amber-50 text-amber-800 border border-amber-200';
             case 'Pending Disposal':
             case 'High':
@@ -2328,14 +3216,23 @@
             case 'Quarantined':
             case 'Due Today':
             case 'Urgent':
-              return 'bg-amber-100 text-amber-900 border border-amber-300';
+            case 'Urgent Review':
+            case 'Port Blocked':
+            case 'Escalated':
+              return 'bg-orange-50 text-orange-900 border border-orange-300';
+            case 'Retired':
+            case 'Monitoring':
+            case 'Resolved':
+              return 'bg-slate-100 text-slate-700 border border-slate-300';
+            case 'Not Applicable':
+              return 'bg-gray-100 text-gray-700 border border-gray-300';
             case 'Critical':
             case 'Overdue':
             case 'Isolated':
             case 'Deficit':
+            case 'Orphan Flagged':
+            case 'Needs Review':
               return 'bg-rose-50 text-rose-800 border border-rose-200';
-            case 'Retired':
-              return 'bg-slate-100 text-slate-700 border border-slate-300';
             default:
               return 'bg-slate-100 text-slate-700 border border-slate-200';
           }
@@ -2347,6 +3244,9 @@
           this.cmdPaletteOpen = false;
           this.comingSoonModalOpen = false;
           this.selectedReportRow = null;
+          this.activeRowMenuId = null;
+          this.activeReportRowMenuId = null;
+          this.deleteModalOpen = false;
         },
 
         showToast(message, type = 'info') {

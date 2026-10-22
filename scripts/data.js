@@ -5,10 +5,10 @@ export const reportConfigs = {
     docType: 'IT Asset Event',
     description: 'Complete audit trail of lifecycle movements, reassignments, repairs, and checkouts.',
     kpis: [
-      { label: 'Total Events', value: '142', change: '+12 this week' },
-      { label: 'Custody Transfers', value: '28', change: '8 pending sign-off' },
-      { label: 'Repairs Logged', value: '14', change: '4 in progress' },
-      { label: 'Auto-Logged (Sync)', value: '118', change: '98.5% confidence' }
+      { label: 'Total Events', value: '142', change: '+12 this week', color: 'blue' },
+      { label: 'Custody Transfers', value: '28', change: '8 pending sign-off', color: 'amber' },
+      { label: 'Repairs Logged', value: '14', change: '4 in progress', color: 'red' },
+      { label: 'Auto-Logged (Sync)', value: '118', change: '98.5% confidence', color: 'emerald' }
     ],
     columns: [
       { key: 'id', label: 'Event ID', sortable: true },
@@ -40,10 +40,10 @@ export const reportConfigs = {
     title: 'Warranty Expiring',
     description: 'Hardware equipment with manufacturer or OEM warranty terminating within 90 days.',
     kpis: [
-      { label: 'Expiring in 30 Days', value: '8', change: 'Critical attention' },
-      { label: 'Expiring in 60-90 Days', value: '16', change: 'Quote requests sent' },
-      { label: 'Total Replacement Value', value: '₹18.4L', change: 'Budget impact' },
-      { label: 'Vendor Renewals Active', value: '4', change: 'Dell & AppleCare' }
+      { label: 'Expiring in 30 Days', value: '8', change: 'Critical attention', color: 'red' },
+      { label: 'Expiring in 60-90 Days', value: '16', change: 'Quote requests sent', color: 'amber' },
+      { label: 'Total Replacement Value', value: '₹18.4L', change: 'Budget impact', color: 'blue' },
+      { label: 'Vendor Renewals Active', value: '4', change: 'Dell & AppleCare', color: 'emerald' }
     ],
     columns: [
       { key: 'id', label: 'Asset ID', sortable: true },
@@ -73,10 +73,10 @@ export const reportConfigs = {
     title: 'Physical Audit Due',
     description: 'Hardware assets requiring physical verification, barcode scan, and location reconciliation.',
     kpis: [
-      { label: 'Audits Overdue', value: '24', change: 'Requires field check' },
-      { label: 'Due This Month', value: '38', change: 'Scheduled cycles' },
-      { label: 'Audited YTD', value: '312', change: '88.4% on-target' },
-      { label: 'Reconciliation Rate', value: '96.2%', change: 'Minimal variances' }
+      { label: 'Audits Overdue', value: '24', change: 'Requires field check', color: 'red' },
+      { label: 'Due This Month', value: '38', change: 'Scheduled cycles', color: 'amber' },
+      { label: 'Audited YTD', value: '312', change: '88.4% on-target', color: 'blue' },
+      { label: 'Reconciliation Rate', value: '96.2%', change: 'Minimal variances', color: 'emerald' }
     ],
     columns: [
       { key: 'id', label: 'Asset ID', sortable: true },
@@ -106,10 +106,10 @@ export const reportConfigs = {
     title: 'Audit Worksheet (30 Days)',
     description: 'Active 30-day inventory batch verification and serial number scanning worksheet.',
     kpis: [
-      { label: 'Worksheet Targets', value: '120', change: 'Current batch' },
-      { label: 'Verified & Reconciled', value: '74', change: '61.6% completed' },
-      { label: 'Discrepancies Flagged', value: '5', change: 'Investigating' },
-      { label: 'Days Remaining', value: '14', change: 'Cycle ends Oct 31' }
+      { label: 'Worksheet Targets', value: '120', change: 'Current batch', color: 'blue' },
+      { label: 'Verified & Reconciled', value: '74', change: '61.6% completed', color: 'emerald' },
+      { label: 'Discrepancies Flagged', value: '5', change: 'Investigating', color: 'red' },
+      { label: 'Days Remaining', value: '14', change: 'Cycle ends Oct 31', color: 'amber' }
     ],
     columns: [
       { key: 'sheet_id', label: 'Batch ID', sortable: true },
@@ -140,10 +140,10 @@ export const reportConfigs = {
     docType: 'Software License',
     description: 'Volume enterprise agreements, seat counts, allocation ratios, and expiry schedules.',
     kpis: [
-      { label: 'Total Licences', value: '42', change: 'Across 18 vendors' },
-      { label: 'Allocated Seats', value: '1,840', change: '86.8% utilization' },
-      { label: 'Unallocated Seats', value: '280', change: 'Available pool' },
-      { label: 'Annual SaaS Spend', value: '₹64.2L', change: 'Contract commitments' }
+      { label: 'Total Licences', value: '42', change: 'Across 18 vendors', color: 'blue' },
+      { label: 'Allocated Seats', value: '1,840', change: '86.8% utilization', color: 'emerald' },
+      { label: 'Unallocated Seats', value: '280', change: 'Available pool', color: 'blue' },
+      { label: 'Annual SaaS Spend', value: '₹64.2L', change: 'Contract commitments', color: 'amber' }
     ],
     columns: [
       { key: 'id', label: 'License ID', sortable: true },
@@ -173,10 +173,10 @@ export const reportConfigs = {
     title: 'Devices by Software',
     description: 'Endpoint application mappings detected via GLPI Agent, Intune MDM, and Entra SSO.',
     kpis: [
-      { label: 'Tracked Packages', value: '156', change: 'Curated catalog' },
-      { label: 'Managed Endpoints', value: '492', change: 'Windows, Mac & Linux' },
-      { label: 'Outdated Builds', value: '34', change: 'Patches scheduled' },
-      { label: 'Discovery Health', value: '99.2%', change: 'Last run 12m ago' }
+      { label: 'Tracked Packages', value: '156', change: 'Curated catalog', color: 'blue' },
+      { label: 'Managed Endpoints', value: '492', change: 'Windows, Mac & Linux', color: 'blue' },
+      { label: 'Outdated Builds', value: '34', change: 'Patches scheduled', color: 'amber' },
+      { label: 'Discovery Health', value: '99.2%', change: 'Last run 12m ago', color: 'emerald' }
     ],
     columns: [
       { key: 'pkg_id', label: 'Package ID', sortable: true },
@@ -208,10 +208,10 @@ export const reportConfigs = {
     title: 'Licence Compliance',
     description: 'Variance analysis comparing contractual license entitlements against real endpoint installations.',
     kpis: [
-      { label: 'Fully Compliant', value: '28', change: 'Within safe margins' },
-      { label: 'Over-allocated', value: '4', change: 'Requires seat purchase' },
-      { label: 'Under-utilized', value: '9', change: 'Savings opportunity' },
-      { label: 'True-up Exposure', value: '₹4.2L', change: 'Audit estimate' }
+      { label: 'Fully Compliant', value: '28', change: 'Within safe margins', color: 'emerald' },
+      { label: 'Over-allocated', value: '4', change: 'Requires seat purchase', color: 'red' },
+      { label: 'Under-utilized', value: '9', change: 'Savings opportunity', color: 'amber' },
+      { label: 'True-up Exposure', value: '₹4.2L', change: 'Audit estimate', color: 'red' }
     ],
     columns: [
       { key: 'product', label: 'Licensed Product', sortable: true },
@@ -239,10 +239,10 @@ export const reportConfigs = {
     title: 'Prohibited Software',
     description: 'Blacklisted executables, unapproved VPNs, peer-to-peer clients, and security policy violations.',
     kpis: [
-      { label: 'Active Alerts', value: '6', change: 'Policy violations' },
-      { label: 'High Severity', value: '3', change: 'Immediate isolate' },
-      { label: 'Isolated Devices', value: '2', change: 'Network restricted' },
-      { label: 'Remediated YTD', value: '41', change: 'Cleaned successfully' }
+      { label: 'Active Alerts', value: '6', change: 'Policy violations', color: 'red' },
+      { label: 'High Severity', value: '3', change: 'Immediate isolate', color: 'red' },
+      { label: 'Isolated Devices', value: '2', change: 'Network restricted', color: 'amber' },
+      { label: 'Remediated YTD', value: '41', change: 'Cleaned successfully', color: 'emerald' }
     ],
     columns: [
       { key: 'alert_id', label: 'Alert ID', sortable: true },
@@ -270,10 +270,10 @@ export const reportConfigs = {
     title: 'Software Cross-Check',
     description: 'Multi-source reconciliation comparing GLPI agent inventory against Microsoft Intune MDM & Entra ID.',
     kpis: [
-      { label: 'Reconciled Endpoints', value: '380', change: 'Cross-verified' },
-      { label: 'Full Source Matches', value: '352', change: '92.6% parity' },
-      { label: 'Identified Discrepancies', value: '28', change: 'Resolution underway' },
-      { label: 'Discovery Latency', value: '< 5m', change: 'Real-time telemetry' }
+      { label: 'Reconciled Endpoints', value: '380', change: 'Cross-verified', color: 'blue' },
+      { label: 'Full Source Matches', value: '352', change: '92.6% parity', color: 'emerald' },
+      { label: 'Identified Discrepancies', value: '28', change: 'Resolution underway', color: 'amber' },
+      { label: 'Discovery Latency', value: '< 5m', change: 'Real-time telemetry', color: 'blue' }
     ],
     columns: [
       { key: 'tag', label: 'Device Tag', sortable: true },
@@ -300,10 +300,10 @@ export const reportConfigs = {
     title: 'SaaS Renewal Watch',
     description: 'Upcoming cloud subscriptions, termination notice periods, pricing reviews, and auto-renew dates.',
     kpis: [
-      { label: 'Renewals (Next 60d)', value: '5', change: 'Negotiation window open' },
-      { label: 'Monthly Run Rate', value: '₹12.8L', change: 'Cloud spend' },
-      { label: 'Potential Savings', value: '₹3.4L', change: 'Idle seat reclamation' },
-      { label: 'Auto-Renew Active', value: '18', change: 'Notice required' }
+      { label: 'Renewals (Next 60d)', value: '5', change: 'Negotiation window open', color: 'amber' },
+      { label: 'Monthly Run Rate', value: '₹12.8L', change: 'Cloud spend', color: 'blue' },
+      { label: 'Potential Savings', value: '₹3.4L', change: 'Idle seat reclamation', color: 'emerald' },
+      { label: 'Auto-Renew Active', value: '18', change: 'Notice required', color: 'amber' }
     ],
     columns: [
       { key: 'service', label: 'SaaS Service', sortable: true },
@@ -331,10 +331,10 @@ export const reportConfigs = {
     title: 'Identity & Access',
     description: 'Microsoft Entra ID directory accounts, privileged administrator roles, and MFA security status.',
     kpis: [
-      { label: 'Synchronized Users', value: '2,410', change: 'Directory active' },
-      { label: 'Privileged Admins', value: '14', change: 'PIM enforced' },
-      { label: 'Orphaned Accounts', value: '3', change: 'Flagged for removal' },
-      { label: 'MFA Enforced Rate', value: '98.9%', change: 'Conditional Access' }
+      { label: 'Synchronized Users', value: '2,410', change: 'Directory active', color: 'blue' },
+      { label: 'Privileged Admins', value: '14', change: 'PIM enforced', color: 'blue' },
+      { label: 'Orphaned Accounts', value: '3', change: 'Flagged for removal', color: 'red' },
+      { label: 'MFA Enforced Rate', value: '98.9%', change: 'Conditional Access', color: 'emerald' }
     ],
     columns: [
       { key: 'upn', label: 'Account (UPN)', sortable: true },
@@ -362,10 +362,10 @@ export const reportConfigs = {
     title: 'Exceptions',
     description: 'Hardware and software exceptions: unassigned hardware, missing serials, IP conflicts, or orphan CIs.',
     kpis: [
-      { label: 'Active Exceptions', value: '34', change: '8 critical severity' },
-      { label: 'Unassigned Hardware', value: '12', change: 'In storage rooms' },
-      { label: 'Missing Primary IP', value: '7', change: 'Agent sync required' },
-      { label: 'Auto-Resolvable', value: '15', change: 'Ready for batch fix' }
+      { label: 'Active Exceptions', value: '34', change: '8 critical severity', color: 'red' },
+      { label: 'Unassigned Hardware', value: '12', change: 'In storage rooms', color: 'amber' },
+      { label: 'Missing Primary IP', value: '7', change: 'Agent sync required', color: 'red' },
+      { label: 'Auto-Resolvable', value: '15', change: 'Ready for batch fix', color: 'blue' }
     ],
     subFilters: ['All', 'Unassigned Hardware', 'Expired Warranty', 'Missing Primary IP', 'Duplicate Serial'],
     columns: [
@@ -394,10 +394,10 @@ export const reportConfigs = {
     title: 'Ticket Queue',
     description: 'Service desk incidents, asset provisioning requests, repair dispatches, and CMDB tasks.',
     kpis: [
-      { label: 'Open Work Orders', value: '22', change: '8 high priority' },
-      { label: 'SLA At Risk', value: '3', change: '< 2 hours left' },
-      { label: 'Resolved Today', value: '15', change: 'Average resolution 2.4h' },
-      { label: 'First Contact Fix', value: '91.2%', change: '+3.4% this month' }
+      { label: 'Open Work Orders', value: '22', change: '8 high priority', color: 'red' },
+      { label: 'SLA At Risk', value: '3', change: '< 2 hours left', color: 'red' },
+      { label: 'Resolved Today', value: '15', change: 'Average resolution 2.4h', color: 'emerald' },
+      { label: 'First Contact Fix', value: '91.2%', change: '+3.4% this month', color: 'emerald' }
     ],
     columns: [
       { key: 'ticket_id', label: 'Ticket ID', sortable: true },

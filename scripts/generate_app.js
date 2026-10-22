@@ -592,44 +592,136 @@ const htmlContent = `<!DOCTYPE html>
           <button @click="clearAllFilters()" class="text-xs text-slate-400 hover:text-slate-700 underline ml-auto">Clear Filters</button>
         </div>
 
-        <!-- List Table Card -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden">
+        <!-- List Table Card (ServiceNow Record Action Row Pattern) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden relative">
+          
+          <!-- BULK ACTIONS STICKY BAR -->
+          <div x-show="selectedRowIds.length > 0" x-cloak class="sticky top-0 z-20 bg-navy-900 text-white px-3.5 py-2 flex items-center justify-between shadow-md border-b-2 border-navy-700">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-bold text-xs tabular-nums" x-text="selectedRowIds.length + ' selected'"></span>
+              </div>
+              <span class="text-navy-600">|</span>
+              <div class="flex items-center gap-1.5">
+                <button @click="bulkAssign()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="user" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Assign</span>
+                </button>
+                <button @click="bulkExport()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Export</span>
+                </button>
+                <button @click="confirmBulkDelete()" class="px-2.5 py-1 rounded bg-rose-900/40 hover:bg-rose-900/70 border border-rose-700/60 text-rose-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+            <button @click="selectedRowIds = []" class="text-xs text-slate-300 hover:text-white underline font-medium transition-colors">
+              Clear selection
+            </button>
+          </div>
+
           <div class="overflow-x-auto flex-1">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 select-none">
                 <tr>
-                  <th class="p-3 w-8">
+                  <th class="p-2 w-8">
                     <input type="checkbox" @change="toggleSelectAll($event)" :checked="isAllSelected" class="rounded text-navy-700">
                   </th>
                   <template x-for="colKey in selectedDisplayColumns" :key="colKey">
-                    <th class="px-3 py-2.5 font-bold whitespace-nowrap text-slate-700" x-text="getColumnLabel(colKey)"></th>
+                    <th :class="isColumnHiddenOnMobile(colKey) ? 'hidden lg:table-cell' : ''" class="px-2 py-2 text-xs font-medium text-slate-700 whitespace-nowrap" x-text="getColumnLabel(colKey)"></th>
                   </template>
-                  <th class="px-3 py-2.5 font-bold text-center w-16">Age</th>
+                  <th class="px-2 py-2 text-xs font-medium text-slate-700 text-center w-16">Age</th>
+                  <th class="w-10 px-2 py-2 text-right"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <template x-for="record in pagedRecords" :key="record.name">
-                  <tr @click="openRecordForm(record)" class="hover:bg-slate-50/80 cursor-pointer transition-colors group">
-                    <td class="p-3" @click.stop>
+                  <tr class="h-[44px] hover:bg-[#F5F5F5] transition-colors duration-150 group">
+                    <td class="p-2 w-8" @click.stop>
                       <input type="checkbox" :value="record.name" x-model="selectedRowIds" class="rounded text-navy-700">
                     </td>
                     <template x-for="colKey in selectedDisplayColumns" :key="colKey">
-                      <td class="px-3 py-2 whitespace-nowrap">
+                      <td :class="isColumnHiddenOnMobile(colKey) ? 'hidden lg:table-cell' : ''" class="px-2 py-2 whitespace-nowrap">
                         <template x-if="colKey === 'asset_name'">
                           <div class="flex items-center gap-2">
-                            <span class="font-bold text-navy-900 group-hover:underline" x-text="record.asset_name"></span>
+                            <a @click.stop="openRecordForm(record)" class="font-bold text-navy-700 hover:text-navy-900 hover:underline cursor-pointer" x-text="record.asset_name"></a>
                             <span class="text-[10px] text-slate-400 font-mono" x-text="record.name"></span>
+                            <template x-if="record.isFavorite">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-3 h-3 text-rose-500 fill-rose-500 shrink-0 inline-block">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                              </svg>
+                            </template>
                           </div>
                         </template>
                         <template x-if="colKey === 'lifecycle_state'">
-                          <span :class="getStatusPillClass(record.lifecycle_state)" class="px-2 py-0.5 rounded-full text-[10px] font-bold" x-text="record.lifecycle_state"></span>
+                          <span :class="getStatusPillClass(record.lifecycle_state)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                            <template x-if="isWarningOrSeverityStatus(record.lifecycle_state)">
+                              <svg :class="isCriticalSeverityStatus(record.lifecycle_state) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                              </svg>
+                            </template>
+                            <span x-text="record.lifecycle_state"></span>
+                          </span>
                         </template>
-                        <template x-if="colKey !== 'asset_name' && colKey !== 'lifecycle_state'">
+                        <template x-if="colKey === 'compliance'">
+                          <span :class="getStatusPillClass(record.compliance)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                            <template x-if="isWarningOrSeverityStatus(record.compliance)">
+                              <svg :class="isCriticalSeverityStatus(record.compliance) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                              </svg>
+                            </template>
+                            <span x-text="record.compliance"></span>
+                          </span>
+                        </template>
+                        <template x-if="colKey !== 'asset_name' && colKey !== 'lifecycle_state' && colKey !== 'compliance'">
                           <span class="text-slate-600" x-text="record[colKey] || '—'"></span>
                         </template>
                       </td>
                     </template>
-                    <td class="px-3 py-2 text-center text-slate-400" x-text="record.age || '1 w'"></td>
+                    <td class="px-2 py-2 text-center text-slate-400 whitespace-nowrap" x-text="record.age || '1 w'"></td>
+                    <td class="w-10 px-2 py-2 text-right whitespace-nowrap relative" @click.stop>
+                      <!-- Three-dot menu button: always visible on desktop and mobile -->
+                      <button @click.stop="toggleRowMenu(record.name)" class="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 transition-all opacity-100 flex items-center justify-center ml-auto" title="Record actions">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                      </button>
+
+                      <!-- ServiceNow Context Popover -->
+                      <div x-show="activeRowMenuId === record.name" @click.away="activeRowMenuId = null" @keydown.escape.stop="activeRowMenuId = null" x-cloak class="absolute right-2 top-8 w-44 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 text-left select-none">
+                        <button @click.stop="openRecordForm(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center justify-between text-slate-700 hover:text-navy-900 group/item">
+                          <div class="flex items-center gap-2">
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-navy-700"></i>
+                            <span class="font-medium text-xs">Open</span>
+                          </div>
+                          <kbd class="text-[9px] font-mono text-slate-400">Esc</kbd>
+                        </button>
+                        <button @click.stop="duplicateRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Duplicate</span>
+                        </button>
+                        <button @click.stop="assignRecordToMe(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Assign to me</span>
+                        </button>
+                        <button @click.stop="toggleFavoriteRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 transition-colors" :class="record.isFavorite ? 'text-rose-500 fill-rose-500' : 'text-slate-400 fill-none'">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                          </svg>
+                          <span class="font-medium text-xs" x-text="record.isFavorite ? 'Favorited' : 'Add to favorites'"></span>
+                        </button>
+                        <button @click.stop="exportSingleRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Export</span>
+                        </button>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <button @click.stop="confirmDeleteRecord(record)" class="w-full text-left px-3 py-1.5 hover:bg-rose-50 flex items-center gap-2 text-rose-600">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                          <span class="font-medium text-xs">Delete</span>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </template>
               </tbody>
@@ -1139,10 +1231,67 @@ const htmlContent = `<!DOCTYPE html>
         <!-- 3-4 KPI Cards Row -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <template x-for="(kpi, kIdx) in (currentReport?.kpis || [])" :key="kIdx">
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-              <div class="text-[10px] uppercase font-bold text-slate-500" x-text="kpi.label"></div>
-              <div class="text-2xl font-bold text-slate-900 tabular-nums mt-1" x-text="kpi.value"></div>
-              <div class="text-[10px] text-slate-400 mt-0.5" x-text="kpi.change"></div>
+            <div :class="getKpiCardClass(kpi)" class="p-3.5 rounded-xl border border-slate-200 shadow-xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 relative overflow-hidden group">
+              <!-- Top Row: Label & Interactive Caution / Warning Sign Badge -->
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider truncate" x-text="kpi.label"></span>
+                
+                <!-- Caution / Warning Sign: Critical & High Severity -->
+                <template x-if="getKpiSignType(kpi) === 'critical'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100/90 text-red-700 text-[10px] font-bold border border-red-200 shadow-2xs shrink-0 select-none cursor-help transition-transform group-hover:scale-105" title="High Severity / Critical condition detected">
+                    <svg class="w-3.5 h-3.5 text-red-600 shrink-0 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+
+                <!-- Caution / Warning Sign: Warning & Attention -->
+                <template x-if="getKpiSignType(kpi) === 'warning'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-100/90 text-amber-800 text-[10px] font-bold border border-amber-200 shadow-2xs shrink-0 select-none cursor-help transition-transform group-hover:scale-105" title="Warning / Attention needed">
+                    <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+
+                <!-- Normal / Compliant -->
+                <template x-if="getKpiSignType(kpi) === 'good'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100/90 text-emerald-800 text-[10px] font-semibold border border-emerald-200 shadow-2xs shrink-0 select-none" title="Compliant & healthy">
+                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+
+                <!-- Informational / Total -->
+                <template x-if="getKpiSignType(kpi) === 'info'">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-100/90 text-blue-800 text-[10px] font-semibold border border-blue-200 shadow-2xs shrink-0 select-none">
+                    <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                    </svg>
+                    <span x-text="getKpiSignLabel(kpi)"></span>
+                  </span>
+                </template>
+              </div>
+
+              <!-- Main Value & Interactive Watermarked Caution Sign Graphic -->
+              <div class="flex items-baseline justify-between mt-1">
+                <div class="text-2xl font-bold text-slate-900 tabular-nums" x-text="kpi.value"></div>
+                <!-- Interactive subtle caution symbol in card background on hover -->
+                <template x-if="['critical', 'warning'].includes(getKpiSignType(kpi))">
+                  <div class="opacity-25 group-hover:opacity-70 transition-opacity">
+                    <svg :class="getKpiSignType(kpi) === 'critical' ? 'text-red-500' : 'text-amber-500'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Change Subtext -->
+              <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1" x-text="kpi.change"></div>
             </div>
           </template>
         </div>
@@ -1157,9 +1306,37 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </template>
 
-        <!-- Compact Data Table Card -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden">
+        <!-- Compact Data Table Card (ServiceNow Record Action Row Pattern) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col overflow-hidden relative">
           
+          <!-- BULK ACTIONS STICKY BAR FOR REPORTS -->
+          <div x-show="selectedReportRowIds.length > 0" x-cloak class="sticky top-0 z-20 bg-navy-900 text-white px-3.5 py-2 flex items-center justify-between shadow-md border-b-2 border-navy-700">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-bold text-xs tabular-nums" x-text="selectedReportRowIds.length + ' selected'"></span>
+              </div>
+              <span class="text-navy-600">|</span>
+              <div class="flex items-center gap-1.5">
+                <button @click="bulkAssignReport()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="user" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Assign</span>
+                </button>
+                <button @click="bulkExportReport()" class="px-2.5 py-1 rounded bg-navy-800 hover:bg-navy-700 border border-navy-700 text-slate-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-navy-400"></i>
+                  <span>Export</span>
+                </button>
+                <button @click="confirmBulkDeleteReport()" class="px-2.5 py-1 rounded bg-rose-900/40 hover:bg-rose-900/70 border border-rose-700/60 text-rose-200 hover:text-white font-medium text-xs flex items-center gap-1.5 transition-colors">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+            <button @click="selectedReportRowIds = []" class="text-xs text-slate-300 hover:text-white underline font-medium transition-colors">
+              Clear selection
+            </button>
+          </div>
+
           <!-- Search & Controls Bar -->
           <div class="p-3 border-b border-slate-200 flex items-center justify-between gap-3 bg-slate-50">
             <div class="relative w-64 max-w-sm">
@@ -1167,7 +1344,7 @@ const htmlContent = `<!DOCTYPE html>
               <input type="text" x-model="reportSearchQuery" placeholder="Filter rows..." class="w-full pl-8 pr-3 py-1 rounded-lg border border-slate-200 text-xs bg-white focus:ring-1 focus:ring-navy-600">
             </div>
             <div class="text-xs text-slate-500">
-              Click any row to inspect detail drawer &bull; Click headers to sort
+              Click any row name to inspect detail drawer &bull; Click headers to sort
             </div>
           </div>
 
@@ -1176,31 +1353,97 @@ const htmlContent = `<!DOCTYPE html>
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 select-none">
                 <tr>
+                  <th class="p-2 w-8">
+                    <input type="checkbox" @change="toggleSelectAllReport($event)" :checked="isAllReportSelected" class="rounded text-navy-700">
+                  </th>
                   <template x-for="col in (currentReport?.columns || [])" :key="col.key">
-                    <th @click="col.sortable ? sortReport(col.key) : null" :class="col.sortable ? 'cursor-pointer hover:bg-slate-100' : ''" class="px-3 py-2.5 font-bold whitespace-nowrap text-slate-700">
+                    <th @click="sortReport(col.key)" class="px-2 py-2 text-xs font-medium text-slate-700 whitespace-nowrap cursor-pointer hover:bg-slate-100 select-none">
                       <div class="flex items-center gap-1.5">
                         <span x-text="col.label"></span>
-                        <template x-if="col.sortable && reportSortColumn === col.key">
-                          <span class="text-indigo-600 font-bold" x-text="reportSortAsc ? '↑' : '↓'"></span>
-                        </template>
+                        <span class="text-indigo-600 font-bold" x-text="reportSortColumn === col.key ? (reportSortAsc ? '↑' : '↓') : ''"></span>
                       </div>
                     </th>
                   </template>
+                  <th class="w-10 px-2 py-2 text-right"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                <template x-for="(row, rIdx) in filteredReportRows" :key="rIdx">
-                  <tr @click="openReportRowDetail(row)" class="hover:bg-slate-50/80 cursor-pointer transition-colors">
-                    <template x-for="col in (currentReport?.columns || [])" :key="col.key">
-                      <td class="px-3 py-2 whitespace-nowrap">
-                        <template x-if="col.key === 'status' || col.key === 'state' || col.key === 'risk' || col.key === 'severity'">
-                          <span :class="getStatusPillClass(row[col.key])" class="px-2 py-0.5 rounded-full text-[10px] font-bold" x-text="row[col.key]"></span>
+                <template x-for="(row, rIdx) in filteredReportRows" :key="getReportRowId(row) || rIdx">
+                  <tr @click="openReportRowDetail(row)" class="h-[44px] hover:bg-[#F5F5F5] transition-colors duration-150 cursor-pointer group">
+                    <td class="p-2 w-8" @click.stop>
+                      <input type="checkbox" :value="getReportRowId(row)" x-model="selectedReportRowIds" class="rounded text-navy-700">
+                    </td>
+                    <template x-for="(col, cIdx) in (currentReport?.columns || [])" :key="col.key">
+                      <td class="px-2 py-2 whitespace-nowrap">
+                        <template x-if="cIdx === 0">
+                          <div class="flex items-center gap-1.5">
+                            <a @click.stop="openReportRowDetail(row)" class="font-bold text-navy-700 hover:text-navy-900 hover:underline cursor-pointer" x-text="row[col.key] || '—'"></a>
+                            <template x-if="row.isFavorite">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-3 h-3 text-rose-500 fill-rose-500 shrink-0 inline-block">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                              </svg>
+                            </template>
+                          </div>
                         </template>
-                        <template x-if="col.key !== 'status' && col.key !== 'state' && col.key !== 'risk' && col.key !== 'severity'">
-                          <span :class="col.key.includes('id') || col.key.includes('serial') ? 'font-mono text-navy-900 font-semibold' : 'text-slate-700'" x-text="row[col.key] || '—'"></span>
+                        <template x-if="cIdx !== 0">
+                          <div>
+                            <template x-if="['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(col.key)">
+                              <span :class="getStatusPillClass(row[col.key])" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                                <template x-if="isWarningOrSeverityStatus(row[col.key])">
+                                  <svg :class="isCriticalSeverityStatus(row[col.key]) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                  </svg>
+                                </template>
+                                <span x-text="row[col.key]"></span>
+                              </span>
+                            </template>
+                            <template x-if="!['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(col.key)">
+                              <span :class="col.key.includes('id') || col.key.includes('serial') || col.key.includes('tag') || col.key.includes('upn') ? 'font-mono text-slate-800 font-semibold' : 'text-slate-600'" x-text="row[col.key] || '—'"></span>
+                            </template>
+                          </div>
                         </template>
                       </td>
                     </template>
+                    <td class="w-10 px-2 py-2 text-right whitespace-nowrap relative" @click.stop>
+                      <!-- Three-dot menu button: always visible on desktop and mobile -->
+                      <button @click.stop="toggleReportRowMenu(getReportRowId(row))" class="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 transition-all opacity-100 flex items-center justify-center ml-auto" title="Record actions">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                      </button>
+
+                      <!-- ServiceNow Context Popover for Reports -->
+                      <div x-show="activeReportRowMenuId === getReportRowId(row)" @click.away="activeReportRowMenuId = null" @keydown.escape.stop="activeReportRowMenuId = null" x-cloak class="absolute right-2 top-8 w-44 bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-30 text-left select-none">
+                        <button @click.stop="openReportRowDetail(row); activeReportRowMenuId = null" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center justify-between text-slate-700 hover:text-navy-900 group/item">
+                          <div class="flex items-center gap-2">
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-navy-700"></i>
+                            <span class="font-medium text-xs">Open</span>
+                          </div>
+                          <kbd class="text-[9px] font-mono text-slate-400">Esc</kbd>
+                        </button>
+                        <button @click.stop="duplicateReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Duplicate</span>
+                        </button>
+                        <button @click.stop="assignReportRowToMe(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Assign to me</span>
+                        </button>
+                        <button @click.stop="toggleFavoriteReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 transition-colors" :class="row.isFavorite ? 'text-rose-500 fill-rose-500' : 'text-slate-400 fill-none'">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                          </svg>
+                          <span class="font-medium text-xs" x-text="row.isFavorite ? 'Favorited' : 'Add to favorites'"></span>
+                        </button>
+                        <button @click.stop="exportReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 hover:text-navy-900">
+                          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-400"></i>
+                          <span class="font-medium text-xs">Export</span>
+                        </button>
+                        <div class="border-t border-slate-100 my-1"></div>
+                        <button @click.stop="confirmDeleteReportRow(row)" class="w-full text-left px-3 py-1.5 hover:bg-rose-50 flex items-center gap-2 text-rose-600">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                          <span class="font-medium text-xs">Delete</span>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </template>
               </tbody>
@@ -1382,35 +1625,54 @@ const htmlContent = `<!DOCTYPE html>
           <div class="p-2.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-[11px] flex items-center justify-between">
             <div class="flex items-center gap-2">
               <i data-lucide="info" class="w-4 h-4 text-indigo-600 shrink-0"></i>
-              <span>Click items to highlight in Indigo, or double-click to transfer immediately. <strong>Asset Name</strong> is locked.</span>
+              <span>Drag &amp; drop to move between lists or reorder columns. Double-click or use &gt; &lt; controls. <strong>Asset Name</strong> is locked.</span>
             </div>
             <button @click="resetColumnsToDefault()" class="text-indigo-700 hover:underline font-bold">Reset Defaults</button>
           </div>
 
           <div class="grid grid-cols-12 gap-2 flex-1 min-h-[360px]">
             <!-- Available Fields -->
-            <div class="col-span-5 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs">
+            <div class="col-span-5 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs transition-all duration-150"
+                 :class="dragOverBucket === 'available' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+                 @dragover.prevent="onDragOverAvailableBucket($event)"
+                 @dragleave="onDragLeaveAvailableBucket($event)"
+                 @drop.prevent="onDropIntoAvailableBucket($event)">
               <div class="font-bold text-slate-800 text-xs mb-1 flex items-center justify-between">
                 <span>Available Fields</span>
                 <span class="font-mono text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded font-bold" x-text="filteredAvailableColumns.length"></span>
               </div>
-              <p class="text-[10px] text-slate-500 mb-1.5">Click to select (or double-click to move)</p>
+              <p class="text-[10px] text-slate-500 mb-1.5">Drag to add or click to select (double-click to move)</p>
               <input type="text" x-model="columnSearchQuery" placeholder="Filter fields..." class="w-full px-2 py-1 mb-2 rounded border border-slate-200 text-xs bg-white">
               <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
                 <template x-for="field in filteredAvailableColumns" :key="field.key">
-                  <div @click="toggleSelectAvailable(field.key)" 
+                  <div draggable="true"
+                       @dragstart="onDragStartAvailable($event, field.key)"
+                       @dragend="onDragEnd()"
+                       @click="toggleSelectAvailable(field.key)" 
                        @dblclick="moveColumnRight(field.key)" 
-                       :class="selectedInAvailable.includes(field.key) 
-                         ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                         : 'bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 text-slate-700'" 
-                       class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                    <div class="flex items-center gap-2">
-                      <div :class="selectedInAvailable.includes(field.key) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                       :class="[
+                         selectedInAvailable.includes(field.key) 
+                           ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                           : 'bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 text-slate-700',
+                         draggedKey === field.key ? 'opacity-30 scale-95 border-dashed border-indigo-400' : ''
+                       ]" 
+                       class="px-2.5 py-1.5 rounded-lg border text-xs cursor-grab active:cursor-grabbing flex items-center justify-between transition-all select-none group/item">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <!-- 6-dot drag grip handle -->
+                      <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="8" cy="6" r="1.5"/>
+                        <circle cx="16" cy="6" r="1.5"/>
+                        <circle cx="8" cy="12" r="1.5"/>
+                        <circle cx="16" cy="12" r="1.5"/>
+                        <circle cx="8" cy="18" r="1.5"/>
+                        <circle cx="16" cy="18" r="1.5"/>
+                      </svg>
+                      <div :class="selectedInAvailable.includes(field.key) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                         <span x-show="selectedInAvailable.includes(field.key)">✓</span>
                       </div>
-                      <span x-text="field.label"></span>
+                      <span class="truncate" x-text="field.label"></span>
                     </div>
-                    <button @click.stop="moveColumnRight(field.key)" :class="selectedInAvailable.includes(field.key) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px]" title="Move right">
+                    <button @click.stop="moveColumnRight(field.key)" :class="selectedInAvailable.includes(field.key) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px] shrink-0" title="Move right">
                       &rarr;
                     </button>
                   </div>
@@ -1428,31 +1690,57 @@ const htmlContent = `<!DOCTYPE html>
             </div>
 
             <!-- Selected Display Columns -->
-            <div class="col-span-4 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs">
+            <div class="col-span-4 flex flex-col border border-slate-200 rounded-lg p-2.5 bg-slate-50 shadow-xs transition-all duration-150"
+                 :class="dragOverBucket === 'selected' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+                 @dragover.prevent="onDragOverSelectedBucket($event)"
+                 @dragleave="onDragLeaveSelectedBucket($event)"
+                 @drop.prevent="onDropIntoSelectedBucket($event)">
               <div class="font-bold text-slate-800 text-xs mb-1 flex items-center justify-between">
                 <span>Selected Display Columns</span>
                 <span class="font-mono text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.2 rounded font-bold" x-text="draftSelectedColumns.length"></span>
               </div>
-              <p class="text-[10px] text-slate-500 mb-1.5">Display order (click to select for reordering)</p>
+              <p class="text-[10px] text-slate-500 mb-1.5">Drag to reorder or drop from available</p>
               <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
                 <template x-for="(colKey, index) in draftSelectedColumns" :key="colKey">
-                  <div @click="toggleSelectChosen(colKey)" 
+                  <div :draggable="colKey !== 'asset_name'"
+                       @dragstart="onDragStartSelected($event, colKey, index)"
+                       @dragover.prevent="onDragOverColumnItem($event, index)"
+                       @dragleave="onDragLeaveColumnItem(index)"
+                       @drop.prevent.stop="onDropOnColumnItem($event, index)"
+                       @dragend="onDragEnd()"
+                       @click="toggleSelectChosen(colKey)" 
                        @dblclick="colKey !== 'asset_name' ? moveColumnLeft(colKey) : null" 
-                       :class="selectedInChosen.includes(colKey) 
-                         ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                         : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'" 
-                       class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                    <div class="flex items-center gap-2 truncate">
-                      <div :class="selectedInChosen.includes(colKey) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                       :class="[
+                         selectedInChosen.includes(colKey) 
+                           ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                           : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800',
+                         draggedKey === colKey ? 'opacity-30 scale-95 border-dashed border-indigo-400' : '',
+                         dragOverTargetIndex === index && draggedKey !== colKey ? 'border-t-2 border-t-indigo-600 bg-indigo-50/80 shadow-xs' : ''
+                       ]" 
+                       class="px-2.5 py-1.5 rounded-lg border text-xs flex items-center justify-between transition-all select-none group/item"
+                       :class="colKey !== 'asset_name' ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <template x-if="colKey !== 'asset_name'">
+                        <!-- 6-dot drag grip handle -->
+                        <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="8" cy="6" r="1.5"/>
+                          <circle cx="16" cy="6" r="1.5"/>
+                          <circle cx="8" cy="12" r="1.5"/>
+                          <circle cx="16" cy="12" r="1.5"/>
+                          <circle cx="8" cy="18" r="1.5"/>
+                          <circle cx="16" cy="18" r="1.5"/>
+                        </svg>
+                      </template>
+                      <div :class="selectedInChosen.includes(colKey) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                         <span x-text="selectedInChosen.includes(colKey) ? '✓' : (index + 1)"></span>
                       </div>
-                      <span x-text="getColumnLabel(colKey)"></span>
+                      <span class="truncate" x-text="getColumnLabel(colKey)"></span>
                     </div>
                     <template x-if="colKey === 'asset_name'">
-                      <span class="text-[9px] px-1 py-0.2 rounded bg-slate-200 text-slate-700 font-bold">🔒 Locked</span>
+                      <span class="text-[9px] px-1 py-0.2 rounded bg-slate-200 text-slate-700 font-bold shrink-0">🔒 Locked</span>
                     </template>
                     <template x-if="colKey !== 'asset_name'">
-                      <button @click.stop="moveColumnLeft(colKey)" :class="selectedInChosen.includes(colKey) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px]" title="Remove">
+                      <button @click.stop="moveColumnLeft(colKey)" :class="selectedInChosen.includes(colKey) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px] shrink-0" title="Remove">
                         ✕
                       </button>
                     </template>
@@ -1509,27 +1797,40 @@ const htmlContent = `<!DOCTYPE html>
 
       <div class="p-4 grid grid-cols-12 gap-2">
         <!-- Left: Available Values -->
-        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs">
+        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs transition-colors"
+             :class="dragOverBucket === 'filter-available' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+             @dragover.prevent="dragOverBucket = 'filter-available'"
+             @dragleave="if (dragOverBucket === 'filter-available') dragOverBucket = null"
+             @drop.prevent="onDropIntoFilterAvailable($event)">
           <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-200">
             <span class="font-bold text-xs text-slate-800">Available Values</span>
             <span class="font-mono text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded font-bold" x-text="filterModalAvailable.length"></span>
           </div>
-          <p class="text-[10px] text-slate-500 mb-1.5">Click to select (or double-click to move)</p>
+          <p class="text-[10px] text-slate-500 mb-1.5">Drag to add (or double-click to move)</p>
           <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
             <template x-for="val in filterModalAvailable" :key="val">
-              <div @click="toggleSelectFilterAvailable(val)" 
+              <div draggable="true"
+                   @dragstart="onDragStartFilterAvailable($event, val)"
+                   @dragend="onDragEnd()"
+                   @click="toggleSelectFilterAvailable(val)" 
                    @dblclick="moveFilterValueRight(val)" 
-                   :class="filterModalSelectedAvail.includes(val) 
-                     ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                     : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50'" 
-                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                <div class="flex items-center gap-2">
-                  <div :class="filterModalSelectedAvail.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                   :class="[
+                     filterModalSelectedAvail.includes(val) 
+                       ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                       : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50',
+                     draggedKey === val ? 'opacity-30 scale-95 border-dashed border-indigo-400' : ''
+                   ]" 
+                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-grab active:cursor-grabbing flex items-center justify-between transition-all select-none group/item">
+                <div class="flex items-center gap-1.5 truncate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/>
+                  </svg>
+                  <div :class="filterModalSelectedAvail.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                     <span x-show="filterModalSelectedAvail.includes(val)">✓</span>
                   </div>
-                  <span x-text="val"></span>
+                  <span class="truncate" x-text="val"></span>
                 </div>
-                <button @click.stop="moveFilterValueRight(val)" :class="filterModalSelectedAvail.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px]" title="Move to Selected">
+                <button @click.stop="moveFilterValueRight(val)" :class="filterModalSelectedAvail.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-600'" class="p-0.5 text-[11px] shrink-0" title="Move to Selected">
                   &rarr;
                 </button>
               </div>
@@ -1544,27 +1845,40 @@ const htmlContent = `<!DOCTYPE html>
         </div>
 
         <!-- Right: Selected Values -->
-        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs">
+        <div class="col-span-5 border border-slate-200 rounded-lg p-2.5 bg-slate-50 h-64 flex flex-col shadow-xs transition-colors"
+             :class="dragOverBucket === 'filter-selected' ? 'ring-2 ring-indigo-500 bg-indigo-50/60 border-indigo-300' : ''"
+             @dragover.prevent="dragOverBucket = 'filter-selected'"
+             @dragleave="if (dragOverBucket === 'filter-selected') dragOverBucket = null"
+             @drop.prevent="onDropIntoFilterSelected($event)">
           <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-200">
             <span class="font-bold text-xs text-slate-800">Selected Values</span>
             <span class="font-mono text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.2 rounded font-bold" x-text="filterModalSelectedDraft.length"></span>
           </div>
-          <p class="text-[10px] text-slate-500 mb-1.5">Values actively filtering table</p>
+          <p class="text-[10px] text-slate-500 mb-1.5">Drag to remove or reorder</p>
           <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
-            <template x-for="val in filterModalSelectedDraft" :key="val">
-              <div @click="toggleSelectFilterChosen(val)" 
+            <template x-for="(val, fIdx) in filterModalSelectedDraft" :key="val">
+              <div draggable="true"
+                   @dragstart="onDragStartFilterSelected($event, val, fIdx)"
+                   @dragend="onDragEnd()"
+                   @click="toggleSelectFilterChosen(val)" 
                    @dblclick="moveFilterValueLeft(val)" 
-                   :class="filterModalSelectedChosen.includes(val) 
-                     ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
-                     : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'" 
-                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none">
-                <div class="flex items-center gap-2">
-                  <div :class="filterModalSelectedChosen.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold">
+                   :class="[
+                     filterModalSelectedChosen.includes(val) 
+                       ? 'bg-indigo-600 text-white font-bold border-indigo-700 shadow-xs ring-2 ring-indigo-400/50' 
+                       : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300',
+                     draggedKey === val ? 'opacity-30 scale-95 border-dashed border-indigo-400' : ''
+                   ]" 
+                   class="px-2.5 py-1.5 rounded-lg border text-xs cursor-grab active:cursor-grabbing flex items-center justify-between transition-all select-none group/item">
+                <div class="flex items-center gap-1.5 truncate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 group-hover/item:text-indigo-600 transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/>
+                  </svg>
+                  <div :class="filterModalSelectedChosen.includes(val) ? 'bg-white text-indigo-700' : 'border border-slate-300 bg-slate-50 text-slate-600'" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                     <span x-show="filterModalSelectedChosen.includes(val)">✓</span>
                   </div>
-                  <span x-text="val"></span>
+                  <span class="truncate" x-text="val"></span>
                 </div>
-                <button @click.stop="moveFilterValueLeft(val)" :class="filterModalSelectedChosen.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px]" title="Remove value">
+                <button @click.stop="moveFilterValueLeft(val)" :class="filterModalSelectedChosen.includes(val) ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'" class="p-0.5 text-[11px] shrink-0" title="Remove value">
                   ✕
                 </button>
               </div>
@@ -1615,9 +1929,21 @@ const htmlContent = `<!DOCTYPE html>
 
               <div class="border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
                 <template x-for="(val, key) in selectedReportRow" :key="key">
-                  <div class="p-2.5 flex items-start justify-between text-xs">
+                  <div class="p-2.5 flex items-center justify-between text-xs">
                     <span class="font-semibold text-slate-500 uppercase text-[10px] tracking-wide" x-text="key.replace('_', ' ')"></span>
-                    <span class="font-mono text-slate-900 text-right max-w-[220px] break-words" x-text="val"></span>
+                    <template x-if="['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(key)">
+                      <span :class="getStatusPillClass(val)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-2xs select-none">
+                        <template x-if="isWarningOrSeverityStatus(val)">
+                          <svg :class="isCriticalSeverityStatus(val) ? 'text-rose-600 animate-pulse' : 'text-amber-600'" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                          </svg>
+                        </template>
+                        <span x-text="val"></span>
+                      </span>
+                    </template>
+                    <template x-if="!['status', 'state', 'risk', 'risk_level', 'severity', 'compliance'].includes(key)">
+                      <span class="font-mono text-slate-900 text-right max-w-[220px] break-words" x-text="val"></span>
+                    </template>
                   </div>
                 </template>
               </div>
@@ -1664,6 +1990,30 @@ const htmlContent = `<!DOCTYPE html>
         </button>
         <button @click="comingSoonModalOpen = false; setView('it-dashboard')" class="px-4 py-2 rounded-lg bg-navy-700 hover:bg-navy-800 text-white font-bold text-xs shadow-xs">
           Open IT Workspace &rarr;
+        </button>
+      </div>
+    </div>
+  <!-- DELETE CONFIRMATION MODAL -->
+  <div x-show="deleteModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="deleteModalOpen = false">
+    <div class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs" @click="deleteModalOpen = false"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl border border-slate-200 max-w-sm w-full p-5 text-left z-10 space-y-3">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm text-slate-900">Are you sure you want to delete this record?</h3>
+          <p class="text-xs text-slate-500 mt-0.5" x-text="deleteIsBulk ? 'You are about to permanently delete ' + (deleteModalType === 'it-asset' ? selectedRowIds.length : selectedReportRowIds.length) + ' selected records.' : 'This action cannot be undone.'"></p>
+        </div>
+      </div>
+      <div class="p-2.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-mono truncate" x-text="getDeleteSummaryText()"></div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button @click="deleteModalOpen = false" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs">
+          Cancel
+        </button>
+        <button @click="executeDelete()" class="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Confirm</span>
         </button>
       </div>
     </div>
@@ -1748,6 +2098,12 @@ const htmlContent = `<!DOCTYPE html>
         currentPage: 1,
         pageSize: 20,
         selectedRowIds: [],
+        activeRowMenuId: null,
+        deleteModalOpen: false,
+        deleteTargetRecord: null,
+        deleteTargetReportRow: null,
+        deleteModalType: 'it-asset',
+        deleteIsBulk: false,
         isColumnsCustomized: false,
 
         // Reports state
@@ -1757,6 +2113,8 @@ const htmlContent = `<!DOCTYPE html>
         reportSortColumn: '',
         reportSortAsc: true,
         selectedReportRow: null,
+        selectedReportRowIds: [],
+        activeReportRowMenuId: null,
         activeSubFilter: 'All',
 
         allFields: [
@@ -1795,6 +2153,13 @@ const htmlContent = `<!DOCTYPE html>
         selectedInAvailable: [],
         selectedInChosen: [],
         columnSearchQuery: '',
+
+        // Drag & Drop State for Slashbucket
+        draggedSource: null,        // 'available' | 'selected' | 'filter-available' | 'filter-selected'
+        draggedKey: null,           // field or value key
+        draggedIndex: null,         // source index in draftSelectedColumns
+        dragOverTargetIndex: null,  // hovered index in draftSelectedColumns
+        dragOverBucket: null,       // 'available' | 'selected' | 'filter-available' | 'filter-selected'
 
         formTabs: [
           { id: 'identity', label: 'Identity', count: 8 },
@@ -1857,6 +2222,8 @@ const htmlContent = `<!DOCTYPE html>
           this.reportSortColumn = '';
           this.reportSortAsc = true;
           this.selectedReportRow = null;
+          this.selectedReportRowIds = [];
+          this.activeReportRowMenuId = null;
           this.activeSubFilter = 'All';
           this.setView('report');
         },
@@ -1903,6 +2270,101 @@ const htmlContent = `<!DOCTYPE html>
           }
         },
 
+        getKpiCardClass(kpi) {
+          const c = kpi?.color || this.resolveKpiColor(kpi);
+          switch (c) {
+            case 'red':
+              return 'border-t-4 border-red-500 bg-red-50';
+            case 'amber':
+            case 'orange':
+              return 'border-t-4 border-amber-500 bg-amber-50';
+            case 'emerald':
+            case 'green':
+              return 'border-t-4 border-emerald-500 bg-emerald-50';
+            case 'blue':
+            case 'slate':
+            default:
+              return 'border-t-4 border-blue-500 bg-blue-50';
+          }
+        },
+
+        resolveKpiColor(kpi) {
+          if (!kpi) return 'blue';
+          const text = ((kpi.label || '') + ' ' + (kpi.change || '')).toLowerCase();
+          if (/overdue|critical|open work|at risk|high severity|discrepanc|missing primary|orphaned|true-up|repairs logged/i.test(text)) {
+            return 'red';
+          }
+          if (/expiring|due this month|due soon|days remaining|unassigned|renewals|under-utilized|outdated|custody|auto-renew|spend/i.test(text)) {
+            return 'amber';
+          }
+          if (/compliant|parity|positive|on track|verified|reconciled|full source|savings|auto-logged|active vendors|reconciliation rate|discovery health|first contact|allocated|remediated|mfa/i.test(text)) {
+            return 'emerald';
+          }
+          return 'blue';
+        },
+
+        getKpiSignType(kpi) {
+          const color = kpi?.color || this.resolveKpiColor(kpi);
+          if (color === 'red') return 'critical';
+          if (color === 'amber' || color === 'orange') return 'warning';
+          if (color === 'emerald' || color === 'green') return 'good';
+          return 'info';
+        },
+
+        getKpiSignLabel(kpi) {
+          const text = ((kpi?.label || '') + ' ' + (kpi?.change || '')).toLowerCase();
+          const color = kpi?.color || this.resolveKpiColor(kpi);
+
+          if (color === 'red') {
+            if (/high severity/i.test(text)) return 'High Severity';
+            if (/critical/i.test(text)) return 'Critical';
+            if (/alert/i.test(text)) return 'Active Alert';
+            if (/overdue/i.test(text)) return 'Overdue';
+            if (/at risk/i.test(text)) return 'SLA At Risk';
+            if (/open work/i.test(text)) return 'Action Req.';
+            if (/discrepanc/i.test(text)) return 'Discrepancy';
+            if (/true-up|over-allocated/i.test(text)) return 'Compliance Risk';
+            if (/missing primary/i.test(text)) return 'Missing IP';
+            if (/orphaned/i.test(text)) return 'Orphan';
+            if (/repairs/i.test(text)) return 'In Repair';
+            return 'Warning';
+          }
+
+          if (color === 'amber' || color === 'orange') {
+            if (/expiring|due/i.test(text)) return 'Due Soon';
+            if (/isolated/i.test(text)) return 'Isolated';
+            if (/unassigned/i.test(text)) return 'Attention';
+            if (/outdated/i.test(text)) return 'Patch Due';
+            if (/discrepanc/i.test(text)) return 'Attention';
+            if (/spend/i.test(text)) return 'Review';
+            if (/custody/i.test(text)) return 'Pending';
+            if (/renewals|auto-renew/i.test(text)) return 'Notice Due';
+            if (/under-utilized/i.test(text)) return 'Optimize';
+            return 'Warning';
+          }
+
+          if (color === 'emerald' || color === 'green') {
+            if (/compliant/i.test(text)) return 'Compliant';
+            if (/verified|reconciled/i.test(text)) return 'Verified';
+            if (/savings/i.test(text)) return 'Savings';
+            if (/remediated/i.test(text)) return 'Remediated';
+            if (/healthy/i.test(text)) return 'Healthy';
+            return 'Normal';
+          }
+
+          return 'Metric';
+        },
+
+        isWarningOrSeverityStatus(s) {
+          if (!s) return false;
+          return /critical|high|urgent|overdue|isolated|deficit|quarantined|blocked|risk|warning|medium|in repair|pending removal|alert|needs review|quote received|renewal pending|under review|pending approval|pending config|po in process|update available|investigating|non-compliant|at risk|pending disposal/i.test(String(s));
+        },
+
+        isCriticalSeverityStatus(s) {
+          if (!s) return false;
+          return /critical|high|urgent|overdue|isolated|deficit|quarantined|blocked|alert|investigating|non-compliant/i.test(String(s));
+        },
+
         openReportRowDetail(row) {
           this.selectedReportRow = row;
           this.$nextTick(() => { this.renderIcons(); });
@@ -1937,6 +2399,7 @@ const htmlContent = `<!DOCTYPE html>
         },
 
         openRecordForm(rec) {
+          this.activeRowMenuId = null;
           this.currentRecord = JSON.parse(JSON.stringify(rec));
           this.isFormDirty = false;
           this.activeFormTab = 'identity';
@@ -2233,6 +2696,162 @@ const htmlContent = `<!DOCTYPE html>
           this.$nextTick(() => { this.renderIcons(); });
         },
 
+        // ==========================================
+        // SLASHBUCKET DRAG & DROP HANDLERS
+        // ==========================================
+        onDragStartAvailable(e, key) {
+          this.draggedSource = 'available';
+          this.draggedKey = key;
+          this.draggedIndex = null;
+          this.dragOverBucket = null;
+          this.dragOverTargetIndex = null;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'copyMove';
+            e.dataTransfer.setData('text/plain', key);
+          }
+        },
+
+        onDragStartSelected(e, key, index) {
+          if (key === 'asset_name') {
+            e.preventDefault();
+            return;
+          }
+          this.draggedSource = 'selected';
+          this.draggedKey = key;
+          this.draggedIndex = index;
+          this.dragOverBucket = null;
+          this.dragOverTargetIndex = null;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', key);
+          }
+        },
+
+        onDragOverColumnItem(e, index) {
+          this.dragOverBucket = 'selected';
+          // Cannot drop before locked asset_name at index 0
+          this.dragOverTargetIndex = Math.max(1, index);
+          if (e.dataTransfer) {
+            e.dataTransfer.dropEffect = 'move';
+          }
+        },
+
+        onDragLeaveColumnItem(index) {
+          if (this.dragOverTargetIndex === index) {
+            this.dragOverTargetIndex = null;
+          }
+        },
+
+        onDropOnColumnItem(e, targetIndex) {
+          const safeTarget = Math.max(1, targetIndex);
+
+          if (this.draggedSource === 'selected' && this.draggedKey) {
+            const key = this.draggedKey;
+            if (key === 'asset_name') return;
+            const oldIdx = this.draftSelectedColumns.indexOf(key);
+            if (oldIdx !== -1) {
+              this.draftSelectedColumns.splice(oldIdx, 1);
+              const insertIdx = safeTarget;
+              this.draftSelectedColumns.splice(insertIdx, 0, key);
+              this.selectedInChosen = [key];
+              this.showToast('Reordered: ' + this.getColumnLabel(key) + ' to position ' + (insertIdx + 1), 'info');
+            }
+          } else if (this.draggedSource === 'available' && this.draggedKey) {
+            const key = this.draggedKey;
+            if (!this.draftSelectedColumns.includes(key)) {
+              this.draftSelectedColumns.splice(safeTarget, 0, key);
+              this.selectedInAvailable = this.selectedInAvailable.filter(k => k !== key);
+              this.selectedInChosen = [key];
+              this.showToast('Added column: ' + this.getColumnLabel(key), 'success');
+            }
+          }
+          this.onDragEnd();
+        },
+
+        onDragOverAvailableBucket(e) {
+          this.dragOverBucket = 'available';
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+        },
+
+        onDragLeaveAvailableBucket(e) {
+          if (this.dragOverBucket === 'available') this.dragOverBucket = null;
+        },
+
+        onDropIntoAvailableBucket(e) {
+          if (this.draggedSource === 'selected' && this.draggedKey && this.draggedKey !== 'asset_name') {
+            const key = this.draggedKey;
+            this.moveColumnLeft(key);
+            this.showToast('Removed column: ' + this.getColumnLabel(key), 'info');
+          }
+          this.onDragEnd();
+        },
+
+        onDragOverSelectedBucket(e) {
+          this.dragOverBucket = 'selected';
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'copyMove';
+        },
+
+        onDragLeaveSelectedBucket(e) {
+          if (this.dragOverBucket === 'selected' && this.dragOverTargetIndex === null) {
+            this.dragOverBucket = null;
+          }
+        },
+
+        onDropIntoSelectedBucket(e) {
+          if (this.draggedSource === 'available' && this.draggedKey) {
+            const key = this.draggedKey;
+            if (!this.draftSelectedColumns.includes(key)) {
+              this.draftSelectedColumns.push(key);
+              this.selectedInAvailable = this.selectedInAvailable.filter(k => k !== key);
+              this.selectedInChosen = [key];
+              this.showToast('Added column: ' + this.getColumnLabel(key), 'success');
+            }
+          }
+          this.onDragEnd();
+        },
+
+        // Filter modal drag and drop handlers
+        onDragStartFilterAvailable(e, val) {
+          this.draggedSource = 'filter-available';
+          this.draggedKey = val;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'copyMove';
+            e.dataTransfer.setData('text/plain', val);
+          }
+        },
+
+        onDragStartFilterSelected(e, val, index) {
+          this.draggedSource = 'filter-selected';
+          this.draggedKey = val;
+          this.draggedIndex = index;
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', val);
+          }
+        },
+
+        onDropIntoFilterSelected(e) {
+          if (this.draggedSource === 'filter-available' && this.draggedKey) {
+            this.moveFilterValueRight(this.draggedKey);
+          }
+          this.onDragEnd();
+        },
+
+        onDropIntoFilterAvailable(e) {
+          if (this.draggedSource === 'filter-selected' && this.draggedKey) {
+            this.moveFilterValueLeft(this.draggedKey);
+          }
+          this.onDragEnd();
+        },
+
+        onDragEnd() {
+          this.draggedSource = null;
+          this.draggedKey = null;
+          this.draggedIndex = null;
+          this.dragOverTargetIndex = null;
+          this.dragOverBucket = null;
+        },
+
         // Slashbucket filters
         openFilterSlashbucket(target) {
           this.filterModalTarget = target;
@@ -2301,6 +2920,270 @@ const htmlContent = `<!DOCTYPE html>
           this.showToast('Applied ' + this.filterModalSelectedDraft.length + ' filter values', 'info');
         },
 
+        isColumnHiddenOnMobile(colKey) {
+          return ['assigned_to', 'assigned_to_source', 'compliance', 'lifecycle_review'].includes(colKey);
+        },
+
+        toggleRowMenu(id) {
+          this.activeRowMenuId = (this.activeRowMenuId === id ? null : id);
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        duplicateRecord(rec) {
+          this.activeRowMenuId = null;
+          const newId = 'ITA-' + String(this.records.length + 601).padStart(5, '0');
+          const copy = JSON.parse(JSON.stringify(rec));
+          copy.name = newId;
+          copy.asset_name = copy.asset_name + ' (Copy)';
+          copy.serial_no = 'SN-DUP-' + Date.now().toString().slice(-6);
+          copy.age = 'just now';
+          copy.activities = [
+            { text: 'Duplicated from ' + rec.name + ' by Syed Hashim', time: 'just now' }
+          ];
+          this.records.unshift(copy);
+          this.records = [...this.records];
+          this.showToast('Duplicated ' + rec.name + ' as ' + newId, 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        assignRecordToMe(rec) {
+          this.activeRowMenuId = null;
+          rec.assigned_to = 'Syed Hashim';
+          rec.assigned_employee = 'Syed Hashim (UPN)';
+          rec.assigned_to_source = 'Manual Assignment';
+          const idx = this.records.findIndex(r => r.name === rec.name);
+          if (idx !== -1) {
+            this.records[idx] = { ...rec };
+          }
+          this.records = [...this.records];
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        toggleFavoriteRecord(rec) {
+          this.activeRowMenuId = null;
+          rec.isFavorite = !rec.isFavorite;
+          const idx = this.records.findIndex(r => r.name === rec.name);
+          if (idx !== -1) {
+            this.records[idx] = { ...rec };
+          }
+          this.records = [...this.records];
+          this.showToast('Added to favorites', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        exportSingleRecord(rec) {
+          this.activeRowMenuId = null;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        confirmDeleteRecord(rec) {
+          this.activeRowMenuId = null;
+          this.deleteTargetRecord = rec;
+          this.deleteTargetReportRow = null;
+          this.deleteModalType = 'it-asset';
+          this.deleteIsBulk = false;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        confirmBulkDelete() {
+          if (this.selectedRowIds.length === 0) return;
+          this.deleteTargetRecord = null;
+          this.deleteTargetReportRow = null;
+          this.deleteModalType = 'it-asset';
+          this.deleteIsBulk = true;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        executeDelete() {
+          if (this.deleteModalType === 'it-asset') {
+            if (this.deleteIsBulk) {
+              const count = this.selectedRowIds.length;
+              this.records = this.records.filter(r => !this.selectedRowIds.includes(r.name));
+              this.selectedRowIds = [];
+            } else if (this.deleteTargetRecord) {
+              const targetName = this.deleteTargetRecord.name;
+              this.records = this.records.filter(r => r.name !== targetName);
+              this.selectedRowIds = this.selectedRowIds.filter(id => id !== targetName);
+              this.deleteTargetRecord = null;
+            }
+            this.records = [...this.records];
+          } else if (this.deleteModalType === 'report' && this.currentReport) {
+            if (this.deleteIsBulk) {
+              this.currentReport.rows = (this.currentReport.rows || []).filter(r => !this.selectedReportRowIds.includes(this.getReportRowId(r)));
+              this.selectedReportRowIds = [];
+            } else if (this.deleteTargetReportRow) {
+              const targetId = this.getReportRowId(this.deleteTargetReportRow);
+              this.currentReport.rows = (this.currentReport.rows || []).filter(r => this.getReportRowId(r) !== targetId);
+              this.selectedReportRowIds = this.selectedReportRowIds.filter(id => id !== targetId);
+              this.deleteTargetReportRow = null;
+            }
+            this.currentReport.rows = [...this.currentReport.rows];
+          }
+          this.deleteModalOpen = false;
+          this.showToast('Deleted', 'info');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkAssign() {
+          if (this.selectedRowIds.length === 0) return;
+          this.records.forEach(r => {
+            if (this.selectedRowIds.includes(r.name)) {
+              r.assigned_to = 'Syed Hashim';
+              r.assigned_employee = 'Syed Hashim (UPN)';
+              r.assigned_to_source = 'Bulk Assignment';
+            }
+          });
+          this.records = [...this.records];
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkExport() {
+          if (this.selectedRowIds.length === 0) return;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        // Report row actions (ServiceNow Record Action Row pattern for all reports)
+        getReportRowId(row) {
+          if (!row) return '';
+          return row.id || row.sheet_id || row.pkg_id || row.alert_id || row.ticket_id || row.tag || row.upn || row.service || row.product || '';
+        },
+
+        toggleSelectAllReport(e) {
+          if (e.target.checked) {
+            this.selectedReportRowIds = this.filteredReportRows.map(r => this.getReportRowId(r));
+          } else {
+            this.selectedReportRowIds = [];
+          }
+        },
+
+        get isAllReportSelected() {
+          return this.filteredReportRows.length > 0 && this.filteredReportRows.every(r => this.selectedReportRowIds.includes(this.getReportRowId(r)));
+        },
+
+        toggleReportRowMenu(id) {
+          this.activeReportRowMenuId = (this.activeReportRowMenuId === id ? null : id);
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        duplicateReportRow(row) {
+          this.activeReportRowMenuId = null;
+          if (!this.currentReport || !this.currentReport.rows) return;
+          const copy = JSON.parse(JSON.stringify(row));
+          const id = this.getReportRowId(row);
+          if (copy.id) copy.id = copy.id + '-COPY';
+          else if (copy.sheet_id) copy.sheet_id = copy.sheet_id + '-COPY';
+          else if (copy.pkg_id) copy.pkg_id = copy.pkg_id + '-COPY';
+          else if (copy.alert_id) copy.alert_id = copy.alert_id + '-COPY';
+          else if (copy.ticket_id) copy.ticket_id = copy.ticket_id + '-COPY';
+          else if (copy.tag) copy.tag = copy.tag + '-COPY';
+          else if (copy.service) copy.service = copy.service + ' (Copy)';
+          else if (copy.product) copy.product = copy.product + ' (Copy)';
+          if (copy.asset_name) copy.asset_name += ' (Copy)';
+          if (copy.name) copy.name += ' (Copy)';
+          if (copy.software) copy.software += ' (Copy)';
+          if (copy.subject) copy.subject += ' (Copy)';
+          this.currentReport.rows.unshift(copy);
+          this.currentReport.rows = [...this.currentReport.rows];
+          this.showToast('Duplicated ' + id, 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        assignReportRowToMe(row) {
+          this.activeReportRowMenuId = null;
+          let updated = false;
+          ['custodian', 'assigned_to', 'assignee', 'auditor', 'user', 'owner', 'initiated_by'].forEach(k => {
+            if (row[k] !== undefined) {
+              row[k] = 'Syed Hashim';
+              updated = true;
+            }
+          });
+          if (!updated) {
+            row.assigned_to = 'Syed Hashim';
+          }
+          if (this.currentReport && this.currentReport.rows) {
+            this.currentReport.rows = [...this.currentReport.rows];
+          }
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        toggleFavoriteReportRow(row) {
+          this.activeReportRowMenuId = null;
+          row.isFavorite = !row.isFavorite;
+          if (this.currentReport && this.currentReport.rows) {
+            this.currentReport.rows = [...this.currentReport.rows];
+          }
+          this.showToast('Added to favorites', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        exportReportRow(row) {
+          this.activeReportRowMenuId = null;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        confirmDeleteReportRow(row) {
+          this.activeReportRowMenuId = null;
+          this.deleteTargetReportRow = row;
+          this.deleteTargetRecord = null;
+          this.deleteModalType = 'report';
+          this.deleteIsBulk = false;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        confirmBulkDeleteReport() {
+          if (this.selectedReportRowIds.length === 0) return;
+          this.deleteTargetRecord = null;
+          this.deleteTargetReportRow = null;
+          this.deleteModalType = 'report';
+          this.deleteIsBulk = true;
+          this.deleteModalOpen = true;
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkAssignReport() {
+          if (this.selectedReportRowIds.length === 0) return;
+          if (!this.currentReport || !this.currentReport.rows) return;
+          this.currentReport.rows.forEach(r => {
+            if (this.selectedReportRowIds.includes(this.getReportRowId(r))) {
+              ['custodian', 'assigned_to', 'assignee', 'auditor', 'user', 'owner'].forEach(k => {
+                if (r[k] !== undefined) r[k] = 'Syed Hashim';
+              });
+              if (!r.custodian && !r.assigned_to && !r.assignee && !r.auditor && !r.user && !r.owner) {
+                r.assigned_to = 'Syed Hashim';
+              }
+            }
+          });
+          this.currentReport.rows = [...this.currentReport.rows];
+          this.showToast('Assigned to Syed Hashim', 'success');
+          this.$nextTick(() => { this.renderIcons(); });
+        },
+
+        bulkExportReport() {
+          if (this.selectedReportRowIds.length === 0) return;
+          this.showToast('Exported record metadata', 'success');
+        },
+
+        getDeleteSummaryText() {
+          if (this.deleteModalType === 'it-asset') {
+            return this.deleteIsBulk ? (this.selectedRowIds.length + ' assets: ' + this.selectedRowIds.join(', ')) : (this.deleteTargetRecord?.name + ' (' + (this.deleteTargetRecord?.asset_name || '') + ')');
+          } else {
+            if (this.deleteIsBulk) {
+              return this.selectedReportRowIds.length + ' records: ' + this.selectedReportRowIds.join(', ');
+            } else if (this.deleteTargetReportRow) {
+              const id = this.getReportRowId(this.deleteTargetReportRow);
+              const name = this.deleteTargetReportRow.asset_name || this.deleteTargetReportRow.name || this.deleteTargetReportRow.software || this.deleteTargetReportRow.subject || '';
+              return id + (name ? ' (' + name + ')' : '');
+            }
+            return '';
+          }
+        },
+
         getStatusPillClass(s) {
           switch (s) {
             case 'Deployed':
@@ -2323,6 +3206,11 @@ const htmlContent = `<!DOCTYPE html>
             case 'Quote Received':
             case 'Under Review':
             case 'Pending Approval':
+            case 'Pending Removal':
+            case 'Pending Config':
+            case 'PO In Process':
+            case 'Assigned':
+            case 'Update Available':
               return 'bg-amber-50 text-amber-800 border border-amber-200';
             case 'Pending Disposal':
             case 'High':
@@ -2331,14 +3219,23 @@ const htmlContent = `<!DOCTYPE html>
             case 'Quarantined':
             case 'Due Today':
             case 'Urgent':
-              return 'bg-amber-100 text-amber-900 border border-amber-300';
+            case 'Urgent Review':
+            case 'Port Blocked':
+            case 'Escalated':
+              return 'bg-orange-50 text-orange-900 border border-orange-300';
+            case 'Retired':
+            case 'Monitoring':
+            case 'Resolved':
+              return 'bg-slate-100 text-slate-700 border border-slate-300';
+            case 'Not Applicable':
+              return 'bg-gray-100 text-gray-700 border border-gray-300';
             case 'Critical':
             case 'Overdue':
             case 'Isolated':
             case 'Deficit':
+            case 'Orphan Flagged':
+            case 'Needs Review':
               return 'bg-rose-50 text-rose-800 border border-rose-200';
-            case 'Retired':
-              return 'bg-slate-100 text-slate-700 border border-slate-300';
             default:
               return 'bg-slate-100 text-slate-700 border border-slate-200';
           }
@@ -2350,6 +3247,9 @@ const htmlContent = `<!DOCTYPE html>
           this.cmdPaletteOpen = false;
           this.comingSoonModalOpen = false;
           this.selectedReportRow = null;
+          this.activeRowMenuId = null;
+          this.activeReportRowMenuId = null;
+          this.deleteModalOpen = false;
         },
 
         showToast(message, type = 'info') {
