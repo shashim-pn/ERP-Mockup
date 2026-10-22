@@ -200,9 +200,26 @@
   }
 
   table {
+    table-layout: auto;
     width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+  }
+
+  table td {
+    max-width: 300px;
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  table tbody tr td:first-child {
+    max-width: 250px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    width: 100%;
   }
 
   thead th {
@@ -215,6 +232,10 @@
     padding: 12px;
     border-bottom: 1px solid #e2e8f0;
     height: 40px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
   }
 
   tbody td {
@@ -223,6 +244,11 @@
     font-size: 14px;
     color: #0f172a;
     height: 44px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
   }
 
   tbody tr {
@@ -231,6 +257,86 @@
 
   tbody tr:hover {
     background: #f8fafc;
+  }
+
+  .overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .overflow-x-auto>table,
+  .overflow-x-auto table {
+    table-layout: auto;
+    min-width: 100%;
+  }
+
+  table th:has(input[type="checkbox"]),
+  table td:has(input[type="checkbox"]) {
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  table th:nth-child(2),
+  table td:nth-child(2) {
+    min-width: 300px;
+    max-width: 300px;
+  }
+
+  table th:nth-child(3),
+  table td:nth-child(3) {
+    min-width: 120px;
+    max-width: 160px;
+  }
+
+  table th:nth-child(4),
+  table td:nth-child(4) {
+    min-width: 150px;
+    max-width: 180px;
+  }
+
+  table th:nth-child(5),
+  table td:nth-child(5) {
+    min-width: 110px;
+    max-width: 140px;
+  }
+
+  table th:nth-child(6),
+  table td:nth-child(6) {
+    min-width: 100px;
+    max-width: 140px;
+  }
+
+  table th:nth-child(n + 7),
+  table td:nth-child(n + 7) {
+    min-width: 90px;
+    max-width: 140px;
+  }
+
+  table td>*,
+  table th>* {
+    max-width: 100%;
+  }
+
+  table td a,
+  table td span,
+  table td div,
+  table td .status-badge,
+  table td .cell-content {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  table td .status-badge,
+  table td .inline-flex {
+    white-space: nowrap;
   }
 
   .status-badge {

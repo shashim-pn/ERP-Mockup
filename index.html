@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/index.css" />
-  <script type="module" src="/src/main.ts"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.17.5/dist/cdn.min.js"></script>
   <style>
     [x-cloak] {
       display: none !important;
@@ -41,8 +41,8 @@
 </head>
 
 <body class="bg-surface-canvas text-slate-900 font-sans antialiased text-xs select-none min-h-screen flex flex-col"
-  x-data="appData()" x-init="initApp()" @keydown.window.ctrl.k.prevent="cmdPaletteOpen = true"
-  @keydown.window.meta.k.prevent="cmdPaletteOpen = true" @keydown.escape.window="closeAllOverlays()">
+  x-data="appData()" x-init="initApp()" @keydown.window.ctrl.k.prevent="openGlobalSearch()"
+  @keydown.window.meta.k.prevent="openGlobalSearch()" @keydown.escape.window="closeAllOverlays()">
 
   <!-- TOP CHROME HEADER (Navy Blue Aesthetic) -->
   <header
@@ -104,7 +104,8 @@
 
     <!-- Center Search with "Ctrl+K" hint -->
     <div class="w-72 sm:w-96 max-w-md">
-      <button @click="cmdPaletteOpen = true"
+      <button type="button" onclick="window.openGlobalSearch && window.openGlobalSearch(); return false;"
+        @click="openGlobalSearch()"
         class="w-full flex items-center justify-between px-3.5 py-1.5 rounded-md bg-navy-950/70 hover:bg-navy-950 text-slate-200 text-xs border border-navy-700/60 transition-colors">
         <div class="flex items-center gap-2 text-slate-300">
           <i data-lucide="search" class="w-3.5 h-3.5 text-navy-400"></i>
@@ -115,15 +116,8 @@
       </button>
     </div>
 
-    <!-- Right: Bell Notification & Avatar "SH" -->
+    <!-- Right: Avatar "SH" -->
     <div class="flex items-center gap-3">
-      <button @click="showToast('3 System Notifications pending', 'info')"
-        class="p-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors relative"
-        title="Notifications">
-        <i data-lucide="bell" class="w-4 h-4"></i>
-        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400"></span>
-      </button>
-
       <div class="relative" x-data="{ open: false }">
         <button @click="open = !open"
           class="w-7 h-7 rounded-full bg-navy-700 text-white font-bold text-xs flex items-center justify-center hover:ring-2 hover:ring-navy-400 transition-all border border-navy-500 shadow-xs"
@@ -2520,55 +2514,38 @@
     </div>
 
     <!-- COMMAND PALETTE (Ctrl+K) -->
-    <div x-show="cmdPaletteOpen" x-cloak class="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4"
-      @keydown.escape.window="cmdPaletteOpen = false">
-      <div class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs" @click="cmdPaletteOpen = false"></div>
+    <div id="global-command-palette" x-show="cmdPaletteOpen" x-cloak
+      x-bind:style="cmdPaletteOpen ? 'display: flex' : 'display: none'"
+      class="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4" @keydown.escape.window="closeGlobalSearch()">
+      <div class="fixed inset-0 bg-navy-950/70 backdrop-blur-xs" @click="closeGlobalSearch()"></div>
       <div
         class="relative bg-white rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full z-10 overflow-hidden select-none">
         <div class="p-3 border-b border-slate-200 flex items-center gap-2.5">
           <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
-          <input type="text" x-model="cmdSearchQuery"
-            placeholder="Search commands, CMDB registers, reports, settings..."
+          <input id="global-command-search" type="text" x-model="cmdSearchQuery"
+            placeholder="Search assets, reports, and current records..."
             class="w-full text-xs outline-none bg-transparent" autofocus>
           <kbd class="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-mono text-slate-400">ESC</kbd>
         </div>
         <div class="p-2 max-h-80 overflow-y-auto space-y-1 text-xs">
-          <button @click="setView('it-dashboard'); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-navy-50 text-left flex items-center justify-between font-bold text-navy-900">
-            <span>IT / ERP Workspace Dashboard</span>
-            <span class="text-[10px] text-slate-400 font-mono">/desk/it</span>
-          </button>
-          <button @click="setView('it-list'); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-indigo-50 text-left flex items-center justify-between font-bold text-indigo-900">
-            <span>IT Assets (CMDB)</span>
-            <span class="text-[10px] text-indigo-600 font-mono">DocType: IT Asset</span>
-          </button>
-          <button @click="openColumnsDrawer(); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-slate-100 text-left flex items-center justify-between font-medium text-slate-700">
-            <span>Open Columns (Slashbucket) Drawer</span>
-            <span class="text-[10px] text-slate-400 font-mono">Drawer</span>
-          </button>
-          <button @click="openReport('asset-events'); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-slate-100 text-left flex items-center justify-between text-slate-700">
-            <span>Asset Events Register</span>
-            <span class="text-[10px] text-slate-400 font-mono">DocType: IT Asset Event</span>
-          </button>
-          <button @click="openReport('software-licences'); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-slate-100 text-left flex items-center justify-between text-slate-700">
-            <span>Software Licences Register</span>
-            <span class="text-[10px] text-slate-400 font-mono">DocType: Software License</span>
-          </button>
-          <button @click="setView('it-sync-settings'); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-slate-100 text-left flex items-center justify-between text-slate-700">
-            <span>IT Sync Settings &amp; Telemetry</span>
-            <span class="text-[10px] text-slate-400 font-mono">Connectors</span>
-          </button>
-
-          <button @click="setView('launcher'); cmdPaletteOpen = false"
-            class="w-full px-2.5 py-1.5 rounded hover:bg-slate-100 text-left flex items-center justify-between text-slate-600">
-            <span>Workspace Launcher</span>
-            <span class="text-[10px] text-slate-400 font-mono">Home</span>
-          </button>
+          <template x-if="cmdSearchResults.length">
+            <template x-for="item in cmdSearchResults" :key="item.id">
+              <button @click="runGlobalSearchResult(item); cmdPaletteOpen = false"
+                class="w-full px-2.5 py-2 rounded hover:bg-slate-100 text-left flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="font-semibold text-slate-800 truncate" x-text="item.title"></div>
+                  <div class="text-[10px] text-slate-500 font-mono truncate" x-text="item.meta"></div>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono shrink-0" x-text="item.type"></span>
+              </button>
+            </template>
+          </template>
+          <template x-if="!cmdSearchResults.length">
+            <div class="px-3 py-4 text-center text-slate-500">
+              <div class="font-semibold text-slate-700 mb-1">No results found</div>
+              <div class="text-[11px] text-slate-500">Search only indexes current workspace data.</div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -2736,17 +2713,44 @@
           },
 
           openComingSoon(moduleName) {
+            this.closeGlobalSearch();
             this.comingSoonModuleName = moduleName;
             this.comingSoonModalOpen = true;
             this.$nextTick(() => { this.renderIcons(); });
           },
 
           setView(v) {
+            this.closeGlobalSearch();
             this.currentView = v;
             this.$nextTick(() => { this.renderIcons(); });
           },
 
+          openGlobalSearch() {
+            this.cmdPaletteOpen = true;
+            this.cmdSearchQuery = '';
+            this.$nextTick(() => {
+              const panel = document.getElementById('global-command-palette');
+              const input = document.getElementById('global-command-search');
+              if (panel) panel.style.display = 'flex';
+              if (input) {
+                input.focus();
+                input.select?.();
+              }
+            });
+          },
+
+          closeGlobalSearch() {
+            this.cmdPaletteOpen = false;
+            this.$nextTick(() => {
+              const panel = document.getElementById('global-command-palette');
+              const input = document.getElementById('global-command-search');
+              if (panel) panel.style.display = 'none';
+              if (input) input.blur();
+            });
+          },
+
           openReport(key) {
+            this.closeGlobalSearch();
             this.currentReportKey = key;
             this.reportSearchQuery = '';
             this.reportSortColumn = '';
@@ -3102,6 +3106,110 @@
           },
 
           applyFilters() { this.currentPage = 1; },
+
+          get cmdSearchResults() {
+            const q = (this.cmdSearchQuery || '').trim().toLowerCase();
+            const maxResults = 6;
+            const seen = new Set();
+            const items = [];
+
+            const pushItem = (item) => {
+              if (!item || seen.has(item.id)) return;
+              seen.add(item.id);
+              items.push(item);
+            };
+
+            const matchesRecord = (record) => {
+              const haystack = [
+                record.asset_name,
+                record.name,
+                record.assigned_to,
+                record.assigned_employee,
+                record.manufacturer,
+                record.model,
+                record.location,
+                record.hostname,
+                record.primary_ip,
+                record.asset_type,
+                record.lifecycle_state,
+                record.compliance
+              ].filter(Boolean).join(' ').toLowerCase();
+
+              return !q ? true : haystack.includes(q);
+            };
+
+            const matchesReport = (title, body) => {
+              const haystack = (title + ' ' + (body || '')).toLowerCase();
+              return !q ? true : haystack.includes(q);
+            };
+
+            (this.records || []).forEach(record => {
+              if (matchesRecord(record)) {
+                pushItem({
+                  id: 'asset-' + record.name,
+                  type: 'Asset',
+                  title: record.asset_name,
+                  meta: record.name + ' • ' + record.asset_type,
+                  target: 'record',
+                  record: JSON.parse(JSON.stringify(record))
+                });
+              }
+            });
+
+            Object.entries(this.reportConfigs || {}).forEach(([key, config]) => {
+              const title = config?.title || key;
+              const summary = [title, config?.docType || '', config?.description || ''].join(' ');
+              if (matchesReport(title, summary)) {
+                pushItem({
+                  id: 'report-' + key,
+                  type: 'Report',
+                  title,
+                  meta: config?.docType || 'Report register',
+                  target: 'report',
+                  key
+                });
+              }
+
+              (config?.rows || []).forEach((row, rowIndex) => {
+                const rowValues = Object.values(row || {}).join(' ');
+                const rowTitle = row.asset_name || row.name || row.id || row.service || row.product || row.software || row.subject || row.ticket_id || row.alert_id || row.pkg_id || row.tag || `Row ${rowIndex + 1}`;
+                if (matchesReport(rowTitle, rowValues)) {
+                  pushItem({
+                    id: 'report-row-' + key + '-' + rowIndex,
+                    type: 'Report item',
+                    title: rowTitle,
+                    meta: title + ' • ' + (row.id || row.name || row.asset_id || row.service || row.product || 'record'),
+                    target: 'report-row',
+                    key,
+                    row
+                  });
+                }
+              });
+            });
+
+            return items.slice(0, maxResults);
+          },
+
+          runGlobalSearchResult(item) {
+            if (!item) return;
+
+            if (item.target === 'record' && item.record) {
+              this.openRecordForm(item.record);
+              return;
+            }
+
+            if (item.target === 'report') {
+              this.openReport(item.key);
+              return;
+            }
+
+            if (item.target === 'report-row' && item.key) {
+              this.openReport(item.key);
+              if (item.row) {
+                this.selectedReportRow = item.row;
+              }
+            }
+          },
 
           clearAllFilters() {
             this.filters = { id: '', name: '', assetTypes: [], lifecycleStates: [] };
@@ -3860,6 +3968,8 @@
             this.columnsDrawerOpen = false;
             this.filterModalOpen = false;
             this.cmdPaletteOpen = false;
+            const panel = document.getElementById('global-command-palette');
+            if (panel) panel.style.display = 'none';
             this.comingSoonModalOpen = false;
             this.selectedReportRow = null;
             this.activeRowMenuId = null;
@@ -3883,12 +3993,38 @@
 
       // Expose globally
       window.appData = appData;
+      window.openGlobalSearch = function () {
+        const state = document.body && document.body._x_dataStack && document.body._x_dataStack[0];
+        if (state && typeof state.openGlobalSearch === 'function') {
+          state.openGlobalSearch();
+          return;
+        }
+        const panel = document.getElementById('global-command-palette');
+        if (panel) {
+          panel.style.display = 'flex';
+          const input = document.getElementById('global-command-search');
+          if (input) {
+            input.focus();
+            input.select?.();
+          }
+        }
+      };
+      window.closeGlobalSearch = function () {
+        const state = document.body && document.body._x_dataStack && document.body._x_dataStack[0];
+        if (state && typeof state.closeGlobalSearch === 'function') {
+          state.closeGlobalSearch();
+          return;
+        }
+        const panel = document.getElementById('global-command-palette');
+        if (panel) panel.style.display = 'none';
+      };
       if (window.Alpine && typeof window.Alpine.data === 'function') {
         try {
           window.Alpine.data('appData', appData);
         } catch (e) { }
       }
     </script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>
