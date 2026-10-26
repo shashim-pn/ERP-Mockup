@@ -1259,16 +1259,65 @@ const htmlContent = `<!DOCTYPE html>
         <!-- 70/30 GRID LAYOUT -->
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_320px] gap-6 items-start">
 
-          <!-- LEFT COLUMN (70%): 5 FORM SECTIONS -->
-          <div class="space-y-6">
+          <!-- LEFT COLUMN (70%): TABBED FORM NAV + HIGH DENSITY CONTENT PANEL -->
+          <div class="flex flex-col gap-4">
 
-            <!-- SECTION 1: BASIC INFORMATION -->
-            <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
-              <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider border-b border-[#e2e8f0] pb-2 flex items-center gap-2 border-l-4 border-[#1e40af] pl-3">
-                <span>BASIC INFORMATION</span>
-              </h3>
+            <!-- Horizontal Tab Navigation Bar -->
+            <div class="bg-white p-1.5 rounded-xl border border-[#e2e8f0] shadow-xs flex items-center gap-1.5 overflow-x-auto">
+              <button @click="activeFormTab = 'identity'"
+                      :class="activeFormTab === 'identity' ? 'bg-[#1e40af] text-white shadow-xs font-bold' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-slate-100 font-medium'"
+                      class="px-3.5 py-2 text-xs rounded-lg whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0">
+                <span>Identity</span>
+                <span :class="activeFormTab === 'identity' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">6</span>
+              </button>
+
+              <button @click="activeFormTab = 'specifications'"
+                      :class="activeFormTab === 'specifications' ? 'bg-[#1e40af] text-white shadow-xs font-bold' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-slate-100 font-medium'"
+                      class="px-3.5 py-2 text-xs rounded-lg whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0">
+                <span>Specifications</span>
+                <span :class="activeFormTab === 'specifications' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">8</span>
+              </button>
+
+              <button @click="activeFormTab = 'commercial'"
+                      :class="activeFormTab === 'commercial' ? 'bg-[#1e40af] text-white shadow-xs font-bold' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-slate-100 font-medium'"
+                      class="px-3.5 py-2 text-xs rounded-lg whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0">
+                <span>Commercial &amp; Financials</span>
+                <span :class="activeFormTab === 'commercial' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">6</span>
+              </button>
+
+              <button @click="activeFormTab = 'assignment'"
+                      :class="activeFormTab === 'assignment' ? 'bg-[#1e40af] text-white shadow-xs font-bold' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-slate-100 font-medium'"
+                      class="px-3.5 py-2 text-xs rounded-lg whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0">
+                <span>Assignment &amp; Custody</span>
+                <span :class="activeFormTab === 'assignment' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">5</span>
+              </button>
+
+              <button @click="activeFormTab = 'audit'"
+                      :class="activeFormTab === 'audit' ? 'bg-[#1e40af] text-white shadow-xs font-bold' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-slate-100 font-medium'"
+                      class="px-3.5 py-2 text-xs rounded-lg whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0">
+                <span>Audit &amp; Discovery</span>
+                <span :class="activeFormTab === 'audit' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">6</span>
+              </button>
+
+              <button @click="activeFormTab = 'relationships'"
+                      :class="activeFormTab === 'relationships' ? 'bg-[#1e40af] text-white shadow-xs font-bold' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-slate-100 font-medium'"
+                      class="px-3.5 py-2 text-xs rounded-lg whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0">
+                <span>Relationships</span>
+                <span :class="activeFormTab === 'relationships' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#64748b]'" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">3</span>
+              </button>
+            </div>
+
+            <!-- TAB 1 CONTENT: IDENTITY -->
+            <div x-show="activeFormTab === 'identity'" class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+                <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#1e40af]"></span>
+                  <span>Asset Identity &amp; System Properties</span>
+                </h3>
+                <span class="text-[11px] text-[#64748b]">Primary Configuration Item Properties</span>
+              </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Asset Name *</label>
                   <input type="text" x-model="currentRecord.asset_name" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs font-semibold focus:ring-1 focus:ring-[#1e40af] bg-white">
@@ -1316,21 +1365,25 @@ const htmlContent = `<!DOCTYPE html>
               </div>
             </div>
 
-            <!-- SECTION 2: SPECIFICATIONS -->
-            <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
-              <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider border-b border-[#e2e8f0] pb-2 flex items-center gap-2 border-l-4 border-[#22c55e] pl-3">
-                <span>HARDWARE SPECIFICATIONS</span>
-              </h3>
+            <!-- TAB 2 CONTENT: SPECIFICATIONS -->
+            <div x-show="activeFormTab === 'specifications'" class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+                <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#22c55e]"></span>
+                  <span>Hardware &amp; System Specifications</span>
+                </h3>
+                <span class="text-[11px] text-[#64748b]">Component &amp; Architecture Details</span>
+              </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Manufacturer</label>
-                  <input type="text" x-model="currentRecord.manufacturer" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                  <input type="text" x-model="currentRecord.manufacturer" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white font-medium">
                 </div>
 
                 <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Model</label>
-                  <input type="text" x-model="currentRecord.model" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                  <input type="text" x-model="currentRecord.model" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white font-medium">
                 </div>
 
                 <div>
@@ -1352,16 +1405,30 @@ const htmlContent = `<!DOCTYPE html>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Operating System</label>
                   <input type="text" value="Windows 11 Pro Enterprise 64-bit" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
                 </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Form Factor / Chassis</label>
+                  <input type="text" value="Ultraportable Laptop (14-inch IPS)" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Graphics / GPU</label>
+                  <input type="text" value="Intel Iris Xe Graphics" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                </div>
               </div>
             </div>
 
-            <!-- SECTION 3: LIFECYCLE & COMPLIANCE -->
-            <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
-              <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider border-b border-[#e2e8f0] pb-2 flex items-center gap-2 border-l-4 border-[#eab308] pl-3">
-                <span>LIFECYCLE &amp; COMMERCIAL</span>
-              </h3>
+            <!-- TAB 3 CONTENT: COMMERCIAL & FINANCIALS -->
+            <div x-show="activeFormTab === 'commercial'" class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+                <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#eab308]"></span>
+                  <span>Commercial &amp; Financial Ledger</span>
+                </h3>
+                <span class="text-[11px] text-[#64748b]">Procurement &amp; Warranty Records</span>
+              </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Purchase Date</label>
                   <input type="date" x-model="currentRecord.purchase_date" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
@@ -1388,19 +1455,23 @@ const htmlContent = `<!DOCTYPE html>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Last Physical Audit Date</label>
-                  <input type="date" x-model="currentRecord.last_audited" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Depreciation Method / Terms</label>
+                  <input type="text" value="Straight Line (36 Months)" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
                 </div>
               </div>
             </div>
 
-            <!-- SECTION 4: ASSIGNMENT -->
-            <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
-              <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider border-b border-[#e2e8f0] pb-2 flex items-center gap-2 border-l-4 border-[#06b6d4] pl-3">
-                <span>ASSIGNMENT &amp; CUSTODY</span>
-              </h3>
+            <!-- TAB 4 CONTENT: ASSIGNMENT & CUSTODY -->
+            <div x-show="activeFormTab === 'assignment'" class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+                <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#06b6d4]"></span>
+                  <span>Assignment &amp; Ownership Custody</span>
+                </h3>
+                <span class="text-[11px] text-[#64748b]">Entra ID &amp; Location Allocation</span>
+              </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Assigned Custodian (UPN)</label>
                   <input type="text" x-model="currentRecord.assigned_to" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
@@ -1415,7 +1486,7 @@ const htmlContent = `<!DOCTYPE html>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Location</label>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Primary Location</label>
                   <input type="text" x-model="currentRecord.location" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
                 </div>
 
@@ -1423,16 +1494,25 @@ const htmlContent = `<!DOCTYPE html>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Owning Entity</label>
                   <input type="text" x-model="currentRecord.owning_entity" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
                 </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Custody Agreement Status</label>
+                  <input type="text" value="Issued - Employee Acknowledged" readonly class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-slate-50 text-[#64748b]">
+                </div>
               </div>
             </div>
 
-            <!-- SECTION 5: ADDITIONAL INFO -->
-            <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
-              <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider border-b border-[#e2e8f0] pb-2 flex items-center gap-2 border-l-4 border-[#8b5cf6] pl-3">
-                <span>NETWORK &amp; TECHNICAL IDENTIFIERS</span>
-              </h3>
+            <!-- TAB 5 CONTENT: AUDIT & DISCOVERY -->
+            <div x-show="activeFormTab === 'audit'" class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+                <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#8b5cf6]"></span>
+                  <span>Audit, Network &amp; Discovery Telemetry</span>
+                </h3>
+                <span class="text-[11px] text-[#64748b]">Automated CMDB Probe &amp; IP Addresses</span>
+              </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Hostname</label>
                   <input type="text" x-model="currentRecord.hostname" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs font-mono bg-white">
@@ -1449,8 +1529,46 @@ const htmlContent = `<!DOCTYPE html>
                 </div>
 
                 <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Last Physical Audit Date</label>
+                  <input type="date" x-model="currentRecord.last_audited" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                </div>
+
+                <div>
                   <label class="block text-xs font-semibold text-[#1e293b] mb-1">Discovery Telemetry Agent</label>
                   <input type="text" x-model="currentRecord.discovery_source" readonly class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-slate-50 text-[#64748b]">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Cloud / Host Environment</label>
+                  <input type="text" x-model="currentRecord.cloud_provider" readonly class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-slate-50 text-[#64748b]">
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 6 CONTENT: RELATIONSHIPS -->
+            <div x-show="activeFormTab === 'relationships'" class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-[#e2e8f0] pb-2.5">
+                <h3 class="font-bold text-xs text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[#ec4899]"></span>
+                  <span>Asset Relationships &amp; Dependent Software</span>
+                </h3>
+                <span class="text-[11px] text-[#64748b]">CMDB Graph &amp; Ticket Links</span>
+              </div>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Parent / Attached Asset</label>
+                  <input type="text" x-model="currentRecord.attached_to" placeholder="None (Standalone CI)" @input="isFormDirty = true" class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-white">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">M365 License Allocation</label>
+                  <input type="text" value="Microsoft 365 Enterprise E5 Seat" readonly class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-slate-50 text-[#64748b]">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#1e293b] mb-1">Linked Service Incident</label>
+                  <input type="text" value="INC-2024-0091 (Trackpad Diagnostic)" readonly class="w-full h-9 px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs bg-slate-50 text-[#64748b]">
                 </div>
               </div>
             </div>
@@ -1747,6 +1865,7 @@ const htmlContent = `<!DOCTYPE html>
         comingSoonModalOpen: false,
         comingSoonModuleName: '',
         isFormDirty: false,
+        activeFormTab: 'identity',
         newCommentText: '',
         activeFilterTab: 'All',
         currentPage: 1,
@@ -1977,6 +2096,7 @@ const htmlContent = `<!DOCTYPE html>
           this.activeRowMenuId = null;
           this.currentRecord = JSON.parse(JSON.stringify(rec));
           this.isFormDirty = false;
+          this.activeFormTab = 'identity';
           this.setView('it-form');
         },
 
