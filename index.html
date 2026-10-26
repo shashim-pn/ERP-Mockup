@@ -1007,49 +1007,82 @@
           </div>
         </div>
 
-        <!-- FILTER TABS BAR -->
-        <div class="bg-white p-2.5 rounded-xl border border-[#e2e8f0] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div class="flex items-center gap-1 overflow-x-auto">
-            <button @click="activeFilterTab = 'All'; applyFilters()" :class="activeFilterTab === 'All' ? 'bg-[#1e40af] text-white font-medium' : 'bg-white text-[#64748b] hover:bg-slate-100'" class="px-3 py-1.5 rounded-lg text-xs transition-colors whitespace-nowrap cursor-pointer">
-              All (118)
-            </button>
-            <button @click="activeFilterTab = 'Deployed'; applyFilters()" :class="activeFilterTab === 'Deployed' ? 'bg-[#1e40af] text-white font-medium' : 'bg-white text-[#64748b] hover:bg-slate-100'" class="px-3 py-1.5 rounded-lg text-xs transition-colors whitespace-nowrap cursor-pointer">
-              Deployed (82)
-            </button>
-            <button @click="activeFilterTab = 'In Storage'; applyFilters()" :class="activeFilterTab === 'In Storage' ? 'bg-[#1e40af] text-white font-medium' : 'bg-white text-[#64748b] hover:bg-slate-100'" class="px-3 py-1.5 rounded-lg text-xs transition-colors whitespace-nowrap cursor-pointer">
-              In Storage (14)
-            </button>
-            <button @click="activeFilterTab = 'In Maintenance'; applyFilters()" :class="activeFilterTab === 'In Maintenance' ? 'bg-[#1e40af] text-white font-medium' : 'bg-white text-[#64748b] hover:bg-slate-100'" class="px-3 py-1.5 rounded-lg text-xs transition-colors whitespace-nowrap cursor-pointer">
-              In Maintenance (12)
-            </button>
-            <button @click="activeFilterTab = 'Lost'; applyFilters()" :class="activeFilterTab === 'Lost' ? 'bg-[#1e40af] text-white font-medium' : 'bg-white text-[#64748b] hover:bg-slate-100'" class="px-3 py-1.5 rounded-lg text-xs transition-colors whitespace-nowrap cursor-pointer">
-              Lost (2)
-            </button>
-            <button @click="activeFilterTab = 'Retired'; applyFilters()" :class="activeFilterTab === 'Retired' ? 'bg-[#1e40af] text-white font-medium' : 'bg-white text-[#64748b] hover:bg-slate-100'" class="px-3 py-1.5 rounded-lg text-xs transition-colors whitespace-nowrap cursor-pointer">
-              Retired (8)
-            </button>
+        <!-- FILTER TABS & SEARCH TOOLBAR CARD -->
+        <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs overflow-hidden flex flex-col divide-y divide-[#e2e8f0]">
+          <!-- TOP DECK: FILTER TABS -->
+          <div class="p-2.5 flex items-center justify-between gap-3 overflow-x-auto bg-white">
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button @click="activeFilterTab = 'All'; applyFilters()"
+                      :class="activeFilterTab === 'All' ? 'bg-[#1e40af] text-white font-bold shadow-2xs' : 'bg-white text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a] font-semibold border border-[#e2e8f0]'"
+                      class="px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap">
+                All (118)
+              </button>
+              <button @click="activeFilterTab = 'Deployed'; applyFilters()"
+                      :class="activeFilterTab === 'Deployed' ? 'bg-[#1e40af] text-white font-bold shadow-2xs' : 'bg-white text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a] font-semibold border border-[#e2e8f0]'"
+                      class="px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap">
+                Deployed (82)
+              </button>
+              <button @click="activeFilterTab = 'In Storage'; applyFilters()"
+                      :class="activeFilterTab === 'In Storage' ? 'bg-[#1e40af] text-white font-bold shadow-2xs' : 'bg-white text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a] font-semibold border border-[#e2e8f0]'"
+                      class="px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap">
+                In Storage (14)
+              </button>
+              <button @click="activeFilterTab = 'In Maintenance'; applyFilters()"
+                      :class="activeFilterTab === 'In Maintenance' ? 'bg-[#1e40af] text-white font-bold shadow-2xs' : 'bg-white text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a] font-semibold border border-[#e2e8f0]'"
+                      class="px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap">
+                In Maintenance (12)
+              </button>
+              <button @click="activeFilterTab = 'Lost'; applyFilters()"
+                      :class="activeFilterTab === 'Lost' ? 'bg-[#1e40af] text-white font-bold shadow-2xs' : 'bg-white text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a] font-semibold border border-[#e2e8f0]'"
+                      class="px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap">
+                Lost (2)
+              </button>
+              <button @click="activeFilterTab = 'Retired'; applyFilters()"
+                      :class="activeFilterTab === 'Retired' ? 'bg-[#1e40af] text-white font-bold shadow-2xs' : 'bg-white text-[#475569] hover:bg-[#f8fafc] hover:text-[#0f172a] font-semibold border border-[#e2e8f0]'"
+                      class="px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap">
+                Retired (8)
+              </button>
+            </div>
+
+            <div class="hidden sm:flex items-center gap-2 text-xs text-[#64748b]">
+              <span class="font-mono text-[11px]" x-text="filteredRecords.length + ' assets showing'"></span>
+            </div>
           </div>
 
-          <!-- Quick search & filter inputs -->
-          <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <input type="text" x-model="filters.id" @input="applyFilters()" placeholder="Search: Filter by ID" class="h-[36px] px-3 py-2 text-[13px] rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] w-36">
-            <input type="text" x-model="filters.name" @input="applyFilters()" placeholder="Search: Filter by Name" class="h-[36px] px-3 py-2 text-[13px] rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] w-44">
-            <select x-model="filters.assetType" @change="applyFilters()" class="h-[36px] px-3 py-2 text-[13px] rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] cursor-pointer">
-              <option value="">Asset Type</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Server">Server</option>
-              <option value="Peripheral">Peripheral</option>
-              <option value="Mobile">Mobile</option>
-            </select>
-            <select x-model="filters.lifecycleState" @change="applyFilters()" class="h-[36px] px-3 py-2 text-[13px] rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] cursor-pointer">
-              <option value="">Lifecycle</option>
-              <option value="Deployed">Deployed</option>
-              <option value="In Stock">In Stock</option>
-              <option value="In Repair">In Repair</option>
-              <option value="Pending Disposal">Pending Disposal</option>
-              <option value="Retired">Retired</option>
-            </select>
-            <button @click="clearAllFilters()" class="text-[13px] text-[#1e40af] hover:underline cursor-pointer font-medium ml-1">Clear Filters</button>
+          <!-- BOTTOM DECK: SEARCH & FILTER INPUTS -->
+          <div class="p-2.5 bg-[#f8fafc] flex flex-wrap items-center gap-2.5">
+            <div class="relative w-44 shrink-0">
+              <input type="text" x-model="filters.id" @input="applyFilters()" placeholder="Filter by ID..." class="w-full h-[36px] px-3 py-1.5 text-xs rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] transition-all">
+            </div>
+
+            <div class="relative w-64 shrink-0">
+              <input type="text" x-model="filters.name" @input="applyFilters()" placeholder="Filter by Asset Name..." class="w-full h-[36px] px-3 py-1.5 text-xs rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] transition-all">
+            </div>
+
+            <div class="w-40 shrink-0">
+              <select x-model="filters.assetType" @change="applyFilters()" class="w-full h-[36px] px-3 py-1.5 text-xs rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] cursor-pointer font-medium">
+                <option value="">Asset Type: All</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Server">Server</option>
+                <option value="Peripheral">Peripheral</option>
+                <option value="Mobile">Mobile</option>
+              </select>
+            </div>
+
+            <div class="w-44 shrink-0">
+              <select x-model="filters.lifecycleState" @change="applyFilters()" class="w-full h-[36px] px-3 py-1.5 text-xs rounded-lg border border-[#e2e8f0] bg-white text-[#1e293b] focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] cursor-pointer font-medium">
+                <option value="">Lifecycle: All</option>
+                <option value="Deployed">Deployed</option>
+                <option value="In Stock">In Stock</option>
+                <option value="In Repair">In Repair</option>
+                <option value="Pending Disposal">Pending Disposal</option>
+                <option value="Retired">Retired</option>
+              </select>
+            </div>
+
+            <button @click="clearAllFilters()" class="text-xs text-[#1e40af] hover:text-blue-900 hover:underline cursor-pointer font-semibold ml-auto shrink-0 px-2 py-1">
+              Clear Filters
+            </button>
           </div>
         </div>
 
