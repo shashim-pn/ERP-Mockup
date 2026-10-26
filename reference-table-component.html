@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enterprise Data Table</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .table-shell {
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 18px rgba(15, 23, 42, 0.03);
+        }
+
+        .data-table th,
+        .data-table td {
+            @apply align-middle;
+        }
+
+        .row-selected {
+            background: #fff7f7;
+            box-shadow: inset 3px 0 0 #ef4444;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 92px;
+            padding: 0.35rem 0.7rem;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: 0.01em;
+        }
+
+        .status-pill .dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 9999px;
+            display: inline-block;
+        }
+
+        .checkbox {
+            width: 0.9rem;
+            height: 0.9rem;
+            border-radius: 0.25rem;
+            border: 1px solid #cbd5e1;
+            accent-color: #2563eb;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 p-6 text-slate-800">
+    <div class="table-shell mx-auto max-w-[1500px] overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+            <div class="flex items-center gap-2">
+                <div class="relative w-[340px]">
+                    <input type="text" value="Search it assets"
+                        class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-600 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none" />
+                    <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="M20 20L16.65 16.65"></path>
+                    </svg>
+                </div>
+
+                <button
+                    class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Group
+                </button>
+                <button
+                    class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Columns
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                    <button
+                        class="rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200">List</button>
+                    <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-500">Kanban</button>
+                    <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-500">Calendar</button>
+                    <button class="rounded-md px-3 py-1.5 text-xs font-medium text-slate-500">Report</button>
+                </div>
+
+                <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                    <button
+                        class="h-7 w-7 rounded-md bg-white text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200">S</button>
+                    <button class="h-7 w-7 rounded-md text-xs font-semibold text-slate-600">M</button>
+                    <button class="h-7 w-7 rounded-md text-xs font-semibold text-slate-600">L</button>
+                </div>
+
+                <button
+                    class="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+                    Export
+                </button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="data-table min-w-full border-separate border-spacing-0">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th
+                            class="w-14 px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            #</th>
+                        <th
+                            class="w-12 px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            <input type="checkbox" class="checkbox" />
+                        </th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            ID</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Asset Name</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Asset Type</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Lifecycle State</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Compliance</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Assigned To</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Last Seen</th>
+                        <th
+                            class="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Review Due</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr class="row-selected h-12 border-t border-slate-200 bg-white text-xs text-slate-700">
+                        <td class="px-2 py-3 text-center font-medium text-slate-500">1</td>
+                        <td class="px-2 py-3 text-center">
+                            <input type="checkbox" class="checkbox" />
+                        </td>
+                        <td class="px-3 py-3 text-blue-600 font-medium">ITA-00412</td>
+                        <td class="px-3 py-3 font-medium text-slate-800">Surface Laptop 5</td>
+                        <td class="px-3 py-3">Laptop</td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-red-50 text-red-700 ring-1 ring-red-200">
+                                <span class="dot bg-red-500"></span>
+                                Lost
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                                <span class="dot bg-slate-500"></span>
+                                Unknown
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">AD</span>
+                                <span>Ananya Das</span>
+                            </div>
+                        </td>
+                        <td class="px-3 py-3">5 Oct 2026</td>
+                        <td class="px-3 py-3">
+                            <span>3 Feb 2027</span>
+                            <span class="ml-2 text-slate-400">+12d</span>
+                        </td>
+                    </tr>
+
+                    <tr class="h-12 border-t border-slate-200 bg-white text-xs text-slate-700">
+                        <td class="px-2 py-3 text-center font-medium text-slate-500">2</td>
+                        <td class="px-2 py-3 text-center">
+                            <input type="checkbox" class="checkbox" />
+                        </td>
+                        <td class="px-3 py-3 text-blue-600 font-medium">ITA-00401</td>
+                        <td class="px-3 py-3 font-medium text-slate-800">ProDesk 400</td>
+                        <td class="px-3 py-3">Desktop</td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-red-50 text-red-700 ring-1 ring-red-200">
+                                <span class="dot bg-red-500"></span>
+                                Lost
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                                <span class="dot bg-slate-500"></span>
+                                Unknown
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">—</span>
+                                <span>—</span>
+                            </div>
+                        </td>
+                        <td class="px-3 py-3">29 Sep 2026</td>
+                        <td class="px-3 py-3">
+                            <span>4 Mar 2027</span>
+                            <span class="ml-2 text-slate-400">+9d</span>
+                        </td>
+                    </tr>
+
+                    <tr class="h-12 border-t border-slate-200 bg-white text-xs text-slate-700">
+                        <td class="px-2 py-3 text-center font-medium text-slate-500">3</td>
+                        <td class="px-2 py-3 text-center">
+                            <input type="checkbox" class="checkbox" />
+                        </td>
+                        <td class="px-3 py-3 text-blue-600 font-medium">ITA-00408</td>
+                        <td class="px-3 py-3 font-medium text-slate-800">ThinkPad X1 Carbon</td>
+                        <td class="px-3 py-3">Laptop</td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                                <span class="dot bg-emerald-500"></span>
+                                Deployed
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                                <span class="dot bg-emerald-500"></span>
+                                Compliant
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-700">AD</span>
+                                <span>Ananya Das</span>
+                            </div>
+                        </td>
+                        <td class="px-3 py-3">22 Oct 2026</td>
+                        <td class="px-3 py-3">
+                            <span>7 Mar 2027</span>
+                            <span class="ml-2 text-slate-400">+4d</span>
+                        </td>
+                    </tr>
+
+                    <tr class="h-12 border-t border-slate-200 bg-white text-xs text-slate-700">
+                        <td class="px-2 py-3 text-center font-medium text-slate-500">4</td>
+                        <td class="px-2 py-3 text-center">
+                            <input type="checkbox" class="checkbox" />
+                        </td>
+                        <td class="px-3 py-3 text-blue-600 font-medium">ITA-00406</td>
+                        <td class="px-3 py-3 font-medium text-slate-800">MacBook Pro 14</td>
+                        <td class="px-3 py-3">Laptop</td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                                <span class="dot bg-slate-500"></span>
+                                In Storage
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <span class="status-pill bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                                <span class="dot bg-slate-500"></span>
+                                Unknown
+                            </span>
+                        </td>
+                        <td class="px-3 py-3">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-[10px] font-semibold text-amber-700">MC</span>
+                                <span>Maya Chen</span>
+                            </div>
+                        </td>
+                        <td class="px-3 py-3">16 Aug 2026</td>
+                        <td class="px-3 py-3">
+                            <span>21 Feb 2027</span>
+                            <span class="ml-2 text-slate-400">+15d</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

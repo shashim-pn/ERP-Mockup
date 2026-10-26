@@ -44,7 +44,6 @@
   x-data="appData()" x-init="initApp()" @keydown.window.ctrl.k.prevent="cmdPaletteOpen = true"
   @keydown.window.meta.k.prevent="cmdPaletteOpen = true" @keydown.escape.window="closeAllOverlays()">
 
-  <!-- TOP CHROME HEADER (Navy Blue Aesthetic) -->
   <header
     class="h-12 bg-[#1e40af] border-b border-[#1e3a8a] text-white flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-40 select-none shadow-sm">
     <div class="flex items-center gap-3">
@@ -428,58 +427,43 @@
                 <span class="text-[10px] uppercase font-bold text-[#64748b]">ASSETS</span>
               </div>
               <button @click="setActiveSectionItem('it-assets'); setView('it-list')"
-                :class="activeItemKey === 'it-assets' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer"
+                :class="activeItemKey === 'it-assets' ? 'sidebar-item is-active' : 'sidebar-item'" class="sidebar-item"
                 title="IT assets">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"
-                    :class="activeItemKey === 'it-assets' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"></span>
                   <span>IT assets</span>
                 </div>
-                <span :class="activeItemKey === 'it-assets' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">118</span>
+                <span class="count-pill">118</span>
               </button>
 
               <button @click="setActiveSectionItem('asset-events'); openReport('asset-events')"
-                :class="activeItemKey === 'asset-events' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer"
-                title="Asset events">
+                :class="activeItemKey === 'asset-events' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item" title="Asset events">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"
-                    :class="activeItemKey === 'asset-events' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"></span>
                   <span>Asset events</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'asset-events' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">45</span>
+                <span class="count-pill">45</span>
               </button>
 
               <button @click="setActiveSectionItem('warranty-expiring'); openReport('warranty-expiring')"
-                :class="activeItemKey === 'warranty-expiring' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer"
-                title="Warranty expiring">
+                :class="activeItemKey === 'warranty-expiring' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item" title="Warranty expiring">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"
-                    :class="activeItemKey === 'warranty-expiring' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"></span>
                   <span>Warranty expiring</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'warranty-expiring' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">8</span>
+                <span class="count-pill">8</span>
               </button>
 
               <button @click="setActiveSectionItem('physical-audit-due'); openReport('physical-audit-due')"
-                :class="activeItemKey === 'physical-audit-due' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer"
-                title="Physical audit due">
+                :class="activeItemKey === 'physical-audit-due' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item" title="Physical audit due">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"
-                    :class="activeItemKey === 'physical-audit-due' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#22c55e] inline-block shrink-0"></span>
                   <span>Physical audit due</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'physical-audit-due' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">12</span>
+                <span class="count-pill">12</span>
               </button>
             </div>
 
@@ -489,68 +473,53 @@
                 <span class="text-[10px] uppercase font-bold text-[#64748b]">SOFTWARE AND LICENSES</span>
               </div>
               <button @click="setActiveSectionItem('software-licenses'); openReport('software-licences')"
-                :class="activeItemKey === 'software-licenses' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'software-licenses' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"
-                    :class="activeItemKey === 'software-licenses' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"></span>
                   <span>Software licenses</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'software-licenses' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">45</span>
+                <span class="count-pill">45</span>
               </button>
 
               <button @click="setActiveSectionItem('license-compliance'); openReport('licence-compliance')"
-                :class="activeItemKey === 'license-compliance' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'license-compliance' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"
-                    :class="activeItemKey === 'license-compliance' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"></span>
                   <span>License compliance</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'license-compliance' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">3</span>
+                <span class="count-pill">3</span>
               </button>
 
               <button @click="setActiveSectionItem('saas-renewal-watch'); openReport('saas-renewal-watch')"
-                :class="activeItemKey === 'saas-renewal-watch' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'saas-renewal-watch' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"
-                    :class="activeItemKey === 'saas-renewal-watch' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"></span>
                   <span>SaaS renewal watch</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'saas-renewal-watch' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">5</span>
+                <span class="count-pill">5</span>
               </button>
 
               <button @click="setActiveSectionItem('license-expiry-calendar'); openReport('warranty-expiring')"
-                :class="activeItemKey === 'license-expiry-calendar' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'license-expiry-calendar' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"
-                    :class="activeItemKey === 'license-expiry-calendar' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"></span>
                   <span>License expiry calendar</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'license-expiry-calendar' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">12</span>
+                <span class="count-pill">12</span>
               </button>
 
               <button @click="setActiveSectionItem('cost-analysis'); openReport('software-cross-check')"
-                :class="activeItemKey === 'cost-analysis' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'cost-analysis' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"
-                    :class="activeItemKey === 'cost-analysis' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#eab308] inline-block shrink-0"></span>
                   <span>Cost analysis</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'cost-analysis' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">1</span>
+                <span class="count-pill">1</span>
               </button>
             </div>
 
@@ -560,68 +529,53 @@
                 <span class="text-[10px] uppercase font-bold text-[#64748b]">IDENTITY AND ACCESS</span>
               </div>
               <button @click="setActiveSectionItem('entra-users'); openReport('identity-access')"
-                :class="activeItemKey === 'entra-users' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'entra-users' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"
-                    :class="activeItemKey === 'entra-users' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"></span>
                   <span>Entra users</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'entra-users' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">542</span>
+                <span class="count-pill">542</span>
               </button>
 
               <button @click="setActiveSectionItem('entra-groups'); openReport('identity-access')"
-                :class="activeItemKey === 'entra-groups' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'entra-groups' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"
-                    :class="activeItemKey === 'entra-groups' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"></span>
                   <span>Entra groups</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'entra-groups' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">12</span>
+                <span class="count-pill">12</span>
               </button>
 
               <button @click="setActiveSectionItem('directory-roles'); openReport('identity-access')"
-                :class="activeItemKey === 'directory-roles' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'directory-roles' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"
-                    :class="activeItemKey === 'directory-roles' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"></span>
                   <span>Directory roles</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'directory-roles' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">28</span>
+                <span class="count-pill">28</span>
               </button>
 
               <button @click="setActiveSectionItem('license-skus'); openReport('identity-access')"
-                :class="activeItemKey === 'license-skus' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'license-skus' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"
-                    :class="activeItemKey === 'license-skus' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"></span>
                   <span>License SKUs</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'license-skus' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">89</span>
+                <span class="count-pill">89</span>
               </button>
 
               <button @click="setActiveSectionItem('portal-access'); openReport('identity-access')"
-                :class="activeItemKey === 'portal-access' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'portal-access' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"
-                    :class="activeItemKey === 'portal-access' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#06b6d4] inline-block shrink-0"></span>
                   <span>Portal access</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'portal-access' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">7</span>
+                <span class="count-pill">7</span>
               </button>
             </div>
 
@@ -631,55 +585,43 @@
                 <span class="text-[10px] uppercase font-bold text-[#64748b]">SECURITY &amp; COMPLIANCE</span>
               </div>
               <button @click="setActiveSectionItem('compliance-reports'); openReport('prohibited-software')"
-                :class="activeItemKey === 'compliance-reports' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'compliance-reports' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"
-                    :class="activeItemKey === 'compliance-reports' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"></span>
                   <span>Compliance reports</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'compliance-reports' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">4</span>
+                <span class="count-pill">4</span>
               </button>
 
               <button @click="setActiveSectionItem('security-audit'); openReport('identity-access')"
-                :class="activeItemKey === 'security-audit' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'security-audit' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"
-                    :class="activeItemKey === 'security-audit' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"></span>
                   <span>Security audit</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'security-audit' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">1</span>
+                <span class="count-pill">1</span>
               </button>
 
               <button @click="setActiveSectionItem('incident-log'); openReport('ticket-queue')"
-                :class="activeItemKey === 'incident-log' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'incident-log' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"
-                    :class="activeItemKey === 'incident-log' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"></span>
                   <span>Incident log</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'incident-log' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">3</span>
+                <span class="count-pill">3</span>
               </button>
 
               <button @click="setActiveSectionItem('policy-documents'); openReport('prohibited-software')"
-                :class="activeItemKey === 'policy-documents' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'policy-documents' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"
-                    :class="activeItemKey === 'policy-documents' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#ef4444] inline-block shrink-0"></span>
                   <span>Policy documents</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'policy-documents' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">12</span>
+                <span class="count-pill">12</span>
               </button>
             </div>
 
@@ -689,16 +631,13 @@
                 <span class="text-[10px] uppercase font-bold text-[#64748b]">EXCEPTIONS</span>
               </div>
               <button @click="setActiveSectionItem('departed-licenses'); openReport('exceptions')"
-                :class="activeItemKey === 'departed-licenses' ? 'bg-[#1e40af] text-white font-bold' : 'text-[#1e293b] hover:bg-[#f8fafc]'"
-                class="sidebar-item w-full text-left px-3 py-2.5 mx-2 rounded-md text-xs flex items-center justify-between transition-colors cursor-pointer">
+                :class="activeItemKey === 'departed-licenses' ? 'sidebar-item is-active' : 'sidebar-item'"
+                class="sidebar-item">
                 <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-xs bg-[#f59e0b] inline-block shrink-0"
-                    :class="activeItemKey === 'departed-licenses' ? 'bg-white' : ''"></span>
+                  <span class="w-1.5 h-1.5 rounded-xs bg-[#f59e0b] inline-block shrink-0"></span>
                   <span>Departed with licenses</span>
                 </div>
-                <span
-                  :class="activeItemKey === 'departed-licenses' ? 'bg-white/20 text-white' : 'bg-[#f1f5f9] text-[#64748b]'"
-                  class="text-[10px] px-1.5 py-0.2 rounded-full font-bold">2</span>
+                <span class="count-pill">2</span>
               </button>
             </div>
 
@@ -1356,57 +1295,68 @@
           </div>
 
           <div class="overflow-x-auto flex-1">
-            <table class="w-full text-left text-[13px]">
-              <thead class="bg-[#f8fafc] border-b border-[#e2e8f0] text-[#64748b] select-none">
+            <table class="enterprise-table">
+              <thead class="select-none">
                 <tr>
-                  <th class="px-4 py-3 w-[30px]">
+                  <th
+                    class="w-14 px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
+                    #</th>
+                  <th class="w-12 px-2 py-3 text-center">
                     <input type="checkbox" @change="toggleSelectAll($event)" :checked="isAllSelected"
-                      class="rounded text-[#1e40af]">
+                      class="h-4 w-4 rounded-[4px] border border-[#cbd5e1] text-[#1e40af] accent-[#1e40af]">
                   </th>
                   <template x-for="colKey in selectedDisplayColumns" :key="colKey">
                     <th
-                      class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-[#64748b] hover:text-[#1e40af] whitespace-nowrap cursor-pointer"
+                      class="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-[#64748b] hover:text-[#1e40af] whitespace-nowrap cursor-pointer"
                       x-text="getColumnLabel(colKey)"></th>
                   </template>
-                  <th class="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-[#64748b] text-center w-16">
+                  <th
+                    class="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-[#64748b] text-center w-16">
                     Age</th>
                   <th class="w-10 px-2 py-3 text-right"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#e2e8f0]">
-                <template x-for="record in pagedRecords" :key="record.name">
+                <template x-for="(record, index) in pagedRecords" :key="record.name">
                   <tr
-                    class="h-[48px] bg-white border-b border-[#e2e8f0] text-[13px] font-normal text-[#1e293b] hover:bg-white transition-colors">
-                    <td class="px-4 py-3 w-[30px]" @click.stop>
+                    :class="record.name === selectedRowIds[0] ? 'row-selected h-12 bg-white border-b border-[#e2e8f0] text-xs text-slate-700 hover:bg-white' : 'h-12 bg-white border-b border-[#e2e8f0] text-xs text-slate-700 hover:bg-white'">
+                    <td class="px-2 py-3 w-14 text-center text-slate-500 tabular-nums text-[11px] font-medium">
+                      <span x-text="index + 1"></span>
+                    </td>
+                    <td class="px-2 py-3 w-12 text-center" @click.stop>
                       <input type="checkbox" :value="record.name" x-model="selectedRowIds"
-                        class="rounded text-[#1e40af]">
+                        class="h-4 w-4 rounded-[4px] border border-[#cbd5e1] text-[#1e40af] accent-[#1e40af]">
                     </td>
                     <template x-for="colKey in selectedDisplayColumns" :key="colKey">
-                      <td class="px-4 py-3 whitespace-nowrap">
+                      <td class="px-4 py-3 whitespace-nowrap align-middle text-xs text-slate-700">
                         <template x-if="colKey === 'asset_name'">
-                          <div class="flex items-center gap-2">
+                          <div class="flex flex-col leading-[1.2]">
                             <a @click.stop="openRecordForm(record)"
-                              class="text-[13px] font-normal text-[#1e40af] hover:font-semibold hover:underline cursor-pointer"
+                              class="text-xs font-medium text-[#1e40af] hover:font-semibold hover:underline cursor-pointer"
                               x-text="record.asset_name"></a>
-                            <span class="text-[11px] text-[#64748b] font-mono" x-text="'(' + record.name + ')'"></span>
+                            <span class="text-[10px] text-[#64748b] font-mono tracking-tight"
+                              x-text="record.name"></span>
                           </div>
                         </template>
 
                         <template x-if="colKey === 'lifecycle_state'">
-                          <span :class="getLifecycleBadgeClass(record.lifecycle_state)"
-                            class="px-2 py-1 rounded text-[12px] font-medium inline-block select-none"
-                            x-text="record.lifecycle_state"></span>
+                          <span :class="getLifecycleBadgeClass(record.lifecycle_state)" class="status-pill">
+                            <span class="status-pill__dot"></span>
+                            <span x-text="record.lifecycle_state"></span>
+                          </span>
                         </template>
 
                         <template x-if="colKey === 'compliance'">
                           <span
-                            :class="record.compliance === 'Compliant' ? 'bg-[#dcfce7] text-[#166534]' : 'bg-[#f3f4f6] text-[#374151]'"
-                            class="px-2 py-1 rounded text-[12px] font-medium inline-block select-none"
-                            x-text="record.compliance"></span>
+                            :class="record.compliance === 'Compliant' ? 'status-pill status-pill--emerald' : 'status-pill status-pill--slate'"
+                            class="status-pill">
+                            <span class="status-pill__dot"></span>
+                            <span x-text="record.compliance"></span>
+                          </span>
                         </template>
 
                         <template x-if="colKey === 'assigned_to_source'">
-                          <div class="flex items-center gap-1.5 text-[13px] font-normal text-[#1e293b]">
+                          <div class="flex items-center gap-1.5 text-xs text-slate-700">
                             <span
                               :class="record.assigned_to_source === 'Entra ID Sync' ? 'bg-[#1e40af]' : 'bg-[#94a3b8]'"
                               class="w-2 h-2 rounded-full inline-block"></span>
@@ -1416,17 +1366,17 @@
 
                         <template x-if="colKey === 'lifecycle_review'">
                           <a @click.stop="showToast('Lifecycle review: ' + (record.lifecycle_review || 'Approved'), 'info')"
-                            class="text-[13px] font-normal text-[#1e40af] hover:underline hover:font-semibold cursor-pointer"
+                            class="text-xs font-medium text-[#1e40af] hover:underline hover:font-semibold cursor-pointer"
                             x-text="record.lifecycle_review || 'Approved'"></a>
                         </template>
 
                         <template
                           x-if="colKey !== 'asset_name' && colKey !== 'lifecycle_state' && colKey !== 'compliance' && colKey !== 'assigned_to_source' && colKey !== 'lifecycle_review'">
-                          <span class="text-[13px] font-normal text-[#1e293b]" x-text="record[colKey] || '—'"></span>
+                          <span class="text-xs text-slate-700" x-text="record[colKey] || '—'"></span>
                         </template>
                       </td>
                     </template>
-                    <td class="px-4 py-3 text-center text-[12px] text-[#64748b] font-normal whitespace-nowrap"
+                    <td class="px-4 py-3 text-center text-[11px] text-[#64748b] font-normal whitespace-nowrap"
                       x-text="record.age || '1 w'"></td>
                     <td class="w-10 px-2 py-3 text-right whitespace-nowrap relative" @click.stop>
                       <button @click.stop="toggleRowMenu(record.name)"
@@ -2094,23 +2044,29 @@
 
         <div class="bg-white rounded-xl border border-[#e2e8f0] shadow-xs flex-1 overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 border-b border-[#e2e8f0] text-[#64748b] select-none">
+            <table class="enterprise-table">
+              <thead class="select-none">
                 <tr>
                   <template x-for="col in (currentReport?.columns || [])" :key="col.key">
-                    <th @click="sortReport(col.key)"
-                      class="px-3 py-2.5 text-[11px] font-bold uppercase text-[#1e293b] hover:text-[#1e40af] whitespace-nowrap cursor-pointer">
+                    <th @click="sortReport(col.key)" class="hover:text-[#1e40af] whitespace-nowrap cursor-pointer">
                       <span x-text="col.label"></span>
                     </th>
                   </template>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-[#e2e8f0]">
+              <tbody>
                 <template x-for="(row, rIdx) in filteredReportRows" :key="rIdx">
-                  <tr class="h-[56px] hover:bg-[#f8fafc] transition-colors">
+                  <tr
+                    :class="rIdx === 0 ? 'row-selected h-12 bg-white border-b border-[#e2e8f0] text-xs text-slate-700' : 'h-12 bg-white border-b border-[#e2e8f0] text-xs text-slate-700'">
                     <template x-for="(col, cIdx) in (currentReport?.columns || [])" :key="col.key">
-                      <td class="px-3 py-2 whitespace-nowrap">
-                        <span class="font-medium text-[#1e293b]" x-text="row[col.key] || '—'"></span>
+                      <td class="whitespace-nowrap align-middle text-xs text-slate-700">
+                        <template x-if="col.key === 'status'">
+                          <span :class="getStatusPillClass(row[col.key])" class="status-pill"
+                            x-text="row[col.key] || '—'"></span>
+                        </template>
+                        <template x-if="col.key !== 'status'">
+                          <span class="text-xs text-slate-700" x-text="row[col.key] || '—'"></span>
+                        </template>
                       </td>
                     </template>
                   </tr>
@@ -2312,7 +2268,7 @@
 
     function appData() {
       return {
-        currentView: 'launcher',
+        currentView: 'it-dashboard',
         sidebarCollapsed: false,
         cmdPaletteOpen: false,
         cmdSearchQuery: '',
@@ -2346,10 +2302,9 @@
         activeItemKey: 'it-home',
 
         selectModule(modKey) {
-          // Set active top-level module (removes active from all others)
+          // Keep sidebar and page route in the same state.
           this.activeModule = modKey;
 
-          // Toggle expansion for clicked module, collapse all others
           Object.keys(this.expandedModules).forEach(k => {
             this.expandedModules[k] = (k === modKey) ? !this.expandedModules[k] : false;
           });
@@ -2437,21 +2392,21 @@
         },
 
         getLifecycleBadgeClass(s) {
-          if (!s) return 'bg-[#f3f4f6] text-[#374151]';
+          if (!s) return 'status-pill status-pill--slate';
           const text = String(s).toLowerCase();
           if (/deployed|compliant|approved|active/i.test(text)) {
-            return 'bg-[#dcfce7] text-[#166534]';
+            return 'status-pill status-pill--emerald';
           }
           if (/in stock|in storage/i.test(text)) {
-            return 'bg-[#e0f2fe] text-[#075985]';
+            return 'status-pill status-pill--sky';
           }
           if (/in repair|expiring|pending/i.test(text)) {
-            return 'bg-[#fef3c7] text-[#92400e]';
+            return 'status-pill status-pill--amber';
           }
           if (/lost|critical|failed/i.test(text)) {
-            return 'bg-[#fee2e2] text-[#991b1b]';
+            return 'status-pill status-pill--red';
           }
-          return 'bg-[#f3f4f6] text-[#374151]';
+          return 'status-pill status-pill--slate';
         },
 
         records: [],
@@ -2489,14 +2444,34 @@
         setView(v) {
           this.currentView = v;
 
-          if (v === 'it-dashboard') {
+          if (v === 'launcher') {
+            this.activeModule = 'home';
+            this.expandedModules.home = true;
+            this.activeItemKey = 'home-item';
+            Object.keys(this.expandedModules).forEach(k => {
+              this.expandedModules[k] = k === 'home';
+            });
+          } else if (v === 'it-dashboard') {
             this.activeModule = 'it';
             this.expandedModules.it = true;
             this.activeItemKey = 'it-home';
-          } else if (v === 'it-list') {
+            Object.keys(this.expandedModules).forEach(k => {
+              this.expandedModules[k] = k === 'it';
+            });
+          } else if (v === 'it-list' || v === 'it-form') {
             this.activeModule = 'it';
             this.expandedModules.it = true;
             this.activeItemKey = 'it-assets';
+            Object.keys(this.expandedModules).forEach(k => {
+              this.expandedModules[k] = k === 'it';
+            });
+          } else if (v === 'report') {
+            this.activeModule = 'it';
+            this.expandedModules.it = true;
+            this.activeItemKey = this.currentReportKey || 'it-assets';
+            Object.keys(this.expandedModules).forEach(k => {
+              this.expandedModules[k] = k === 'it';
+            });
           }
 
           this.$nextTick(() => { this.renderIcons(); });
@@ -2526,22 +2501,22 @@
         },
 
         getStatusPillClass(s) {
-          if (!s) return 'bg-slate-100 text-slate-700 border-slate-200';
+          if (!s) return 'status-pill status-pill--slate';
           const text = String(s).toLowerCase();
 
           if (/deployed|compliant|approved|active|verified|completed/i.test(text)) {
-            return 'bg-[#dcfce7] text-[#166534] border border-emerald-200';
+            return 'status-pill status-pill--emerald';
           }
           if (/in stock|in storage|azure|entra/i.test(text)) {
-            return 'bg-[#e0f2fe] text-[#075985] border border-sky-200';
+            return 'status-pill status-pill--sky';
           }
           if (/in repair|expiring|due|pending|review|attention/i.test(text)) {
-            return 'bg-[#fef3c7] text-[#92400e] border border-amber-200';
+            return 'status-pill status-pill--amber';
           }
           if (/lost|overdue|critical|failed|high|non-compliant/i.test(text)) {
-            return 'bg-[#fee2e2] text-[#991b1b] border border-rose-200';
+            return 'status-pill status-pill--red';
           }
-          return 'bg-[#f3f4f6] text-[#374151] border border-slate-200';
+          return 'status-pill status-pill--slate';
         },
 
         getStatusDotClass(value, kind = 'status') {
