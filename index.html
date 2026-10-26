@@ -2268,7 +2268,7 @@
 
     function appData() {
       return {
-        currentView: 'it-dashboard',
+        currentView: 'launcher',
         sidebarCollapsed: false,
         cmdPaletteOpen: false,
         cmdSearchQuery: '',
@@ -2285,13 +2285,13 @@
         activeRowMenuId: null,
         isColumnsCustomized: false,
 
-        // Single Active Top-Level Module (default: 'it')
-        activeModule: 'it',
+        // Single Active Top-Level Module (default: 'home')
+        activeModule: 'home',
         expandedModules: {
-          home: false,
+          home: true,
           finance: false,
           hr: false,
-          it: true,
+          it: false,
           security: false,
           helpdesk: false,
           marketing: false,
@@ -2299,7 +2299,7 @@
         },
 
         // Single Active Sidebar Item across entire application
-        activeItemKey: 'it-home',
+        activeItemKey: 'home-item',
 
         selectModule(modKey) {
           // Keep sidebar and page route in the same state.

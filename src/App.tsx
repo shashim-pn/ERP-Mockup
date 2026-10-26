@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
 type ActiveView =
+  | 'launcher'
   | 'it_home'
   | 'it_assets'
   | 'asset_events'
@@ -147,6 +148,18 @@ const sidebarSections = [
   { id: 'exceptions', label: 'Exceptions' }
 ] as const;
 
+const launcherTiles = [
+  { id: 'finance', label: 'Finance', tone: 'slate', accent: 'F' },
+  { id: 'helpdesk', label: 'Helpdesk', tone: 'navy', accent: 'N' },
+  { id: 'insights', label: 'Insights', tone: 'sky', accent: 'I' },
+  { id: 'it', label: 'IT', tone: 'blue', accent: 'I', highlight: 'Live' },
+  { id: 'marketing', label: 'Marketing', tone: 'indigo', accent: 'M' },
+  { id: 'proficientnow', label: 'ProficientNow', tone: 'teal', accent: 'P' },
+  { id: 'operations', label: 'Operations', tone: 'rose', accent: 'O' },
+  { id: 'security', label: 'Security', tone: 'emerald', accent: 'S' },
+  { id: 'admin', label: 'Admin', tone: 'amber', accent: 'A' }
+] as const;
+
 function WorkspaceTable({ columns, rows }: { columns: ColumnConfig[]; rows: DataRow[] }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -182,10 +195,10 @@ function WorkspaceTable({ columns, rows }: { columns: ColumnConfig[]; rows: Data
                   return (
                     <td key={`${row.subtitle}-${column.key}`} className="px-3 py-2.5 text-xs text-slate-700">
                       <div className="flex flex-col leading-[1.2]">
-                        <button type="button" className="text-left text-blue-600 font-medium text-xs hover:underline">
+                        <button type="button" className="text-left text-[11px] font-medium text-blue-600 hover:underline">
                           {row.title}
                         </button>
-                        <span className="mt-0.5 font-mono text-[11px] text-slate-400">{row.subtitle}</span>
+                        <span className="mt-0.5 font-mono text-[10px] text-slate-400">{row.subtitle}</span>
                       </div>
                     </td>
                   );
@@ -223,7 +236,7 @@ function WorkspaceTable({ columns, rows }: { columns: ColumnConfig[]; rows: Data
 }
 
 export default function App() {
-  const [activeView, setActiveView] = useState<ActiveView>('it_home');
+  const [activeView, setActiveView] = useState<ActiveView>('launcher');
 
   const currentTable = activeView === 'it_home' ? tableViews.it_assets : tableViews[activeView as Exclude<ActiveView, 'it_home'>];
 
@@ -292,7 +305,50 @@ export default function App() {
           </header>
 
           <section className="p-6">
-            {activeView === 'it_home' ? (
+            {activeView === 'launcher' ? (
+              <div className="flex min-h-[calc(100vh-120px)] items-center justify-center bg-white">
+                <div className="w-full max-w-4xl">
+                  <div className="mb-10 flex items-center justify-center gap-2 text-slate-900">
+                    <div className="text-2xl font-bold tracking-tight">Proficient</div>
+                    <div className="font-serif text-2xl italic font-semibold text-blue-500">Now.</div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-x-12 gap-y-10 justify-items-center">
+                    {launcherTiles.map((tile) => (
+                      <button
+                        key={tile.id}
+                        type="button"
+                        onClick={() => setActiveView(tile.id === 'it' ? 'it_home' : 'it_home')}
+                        className="group relative flex flex-col items-center transition-transform hover:-translate-y-1"
+                      >
+                        <div
+                          className={`relative flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white shadow-sm transition-all ${tile.tone === 'slate' ? 'bg-slate-500' :
+                              tile.tone === 'navy' ? 'bg-slate-900 text-blue-200' :
+                                tile.tone === 'sky' ? 'bg-sky-600' :
+                                  tile.tone === 'blue' ? 'bg-blue-700 ring-2 ring-blue-500/30' :
+                                    tile.tone === 'indigo' ? 'bg-indigo-600' :
+                                      tile.tone === 'teal' ? 'bg-teal-600' :
+                                        tile.tone === 'rose' ? 'bg-rose-500' :
+                                          tile.tone === 'emerald' ? 'bg-emerald-600' :
+                                            'bg-amber-500'
+                            }`}
+                        >
+                          <span className="border-y-2 border-white px-1 leading-none">{tile.accent}</span>
+                          {tile.highlight && (
+                            <span className="absolute -right-2 -top-2 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm">
+                              {tile.highlight}
+                            </span>
+                          )}
+                        </div>
+                        <span className="mt-2.5 text-xs font-semibold tracking-tight text-slate-700 group-hover:text-blue-700">
+                          {tile.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : activeView === 'it_home' ? (
               <div className="space-y-6">
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">Overview</p>
