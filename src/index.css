@@ -273,62 +273,96 @@
     margin-top: 4px;
     padding: 0 0 2px;
     background: transparent;
-    border-left: 1px solid rgba(148, 163, 184, 0.28);
-    border-radius: 0;
   }
 
+  .section-header,
   .sidebar-section>div:first-child {
     display: flex;
     align-items: center;
     min-height: 22px;
-    margin: 0 0 4px;
-    padding: 8px 10px 6px 12px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #64748b;
-    border-left: 2px solid rgba(148, 163, 184, 0.75);
-    background: transparent;
+    margin: 4px 0 2px;
+    padding: 12px 12px 4px 12px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: #64748b !important;
+    background: transparent !important;
+    border: none !important;
   }
 
+  .section-header:hover,
+  .sidebar-section>div:first-child:hover {
+    background: transparent !important;
+    cursor: default !important;
+  }
+
+  /* Sidebar items - base */
   .sidebar-item {
-    min-height: 32px !important;
-    height: 32px !important;
-    padding: 7px 10px 7px 12px !important;
-    margin: 0 !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
-    letter-spacing: -0.01em !important;
-    border-radius: 0 !important;
-    border: 0 !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    background: #ffffff !important;
+    padding: 10px 12px !important;
+    margin: 2px 8px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
     color: #1e293b !important;
-    box-shadow: none !important;
+    font-weight: 400 !important;
+    cursor: pointer !important;
+    background: white !important;
+    border: none !important;
+    transition: all 0.2s ease-in-out !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    width: 100% !important;
-    font-weight: 500 !important;
-    text-align: left !important;
-    cursor: pointer !important;
+    width: auto !important;
+    box-shadow: none !important;
   }
 
-  .sidebar-item:last-child {
-    border-bottom: none !important;
-  }
-
-  .sidebar-item:hover {
+  /* Sidebar items - hover (not active) */
+  .sidebar-item:hover:not(.active):not(.is-active) {
     background: #f8fafc !important;
+    color: #1e293b !important;
   }
 
-  .sidebar-item.is-active,
+  /* Sidebar items - active */
   .sidebar-item.active,
+  .sidebar-item.is-active,
   .sidebar-item[aria-current="page"] {
-    background: #fff7f7 !important;
-    box-shadow: inset 3px 0 0 #ef4444 !important;
+    background: #1e40af !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+  }
+
+  /* Module headers */
+  .module-header {
+    padding: 10px 12px !important;
+    margin: 4px 8px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
     color: #1e293b !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    background: white !important;
+    border: none !important;
+    transition: all 0.2s ease-in-out !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  /* Module headers - hover */
+  .module-header:hover:not(.active):not(.is-active) {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+  }
+
+  /* Module headers - active */
+  .module-header.active,
+  .module-header.is-active {
+    background: #1e40af !important;
+    color: white !important;
+    font-weight: 600 !important;
   }
 
   .sidebar-item>div:first-child {
@@ -345,32 +379,40 @@
     white-space: nowrap;
   }
 
+  /* Sidebar badges */
+  .sidebar-badge,
   .sidebar-item>span:last-child,
   .count-pill {
+    margin-left: auto !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 26px !important;
+    min-width: 22px !important;
     height: 20px !important;
-    padding: 0 7px !important;
-    border-radius: 9999px !important;
-    background: #f1f5f9 !important;
+    padding: 2px 8px !important;
+    border-radius: 12px !important;
+    background: #e2e8f0 !important;
     color: #64748b !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
     line-height: 1 !important;
-    letter-spacing: -0.01em !important;
-    border: 1px solid #e2e8f0 !important;
+    border: none !important;
     box-shadow: none !important;
+    transition: all 0.2s ease-in-out !important;
   }
 
-  .sidebar-item.is-active>span:last-child,
+  /* When item is active, badge inherits white background / text color */
+  .sidebar-item.active .sidebar-badge,
+  .sidebar-item.is-active .sidebar-badge,
+  .sidebar-item.active .count-pill,
+  .sidebar-item.is-active .count-pill,
   .sidebar-item.active>span:last-child,
-  .sidebar-section .sidebar-item.is-active .count-pill,
-  .sidebar-section .count-pill {
-    background: rgba(239, 68, 68, 0.08) !important;
-    color: #991b1b !important;
-    border-color: rgba(239, 68, 68, 0.2) !important;
+  .sidebar-item.is-active>span:last-child,
+  .module-header.active .sidebar-badge,
+  .module-header.active .count-pill {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    border: none !important;
   }
 
   .enterprise-table tbody tr:hover td {
