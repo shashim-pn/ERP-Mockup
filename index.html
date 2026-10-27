@@ -37,6 +37,64 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94A3B8;
     }
+
+    /* Table consistency styles */
+    .table-container {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    .table-header {
+      background: #f8fafc;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #64748b;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-row {
+      height: 48px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: white;
+      align-items: center;
+    }
+
+    .table-row:hover {
+      background: white;
+    }
+
+    .table-row.selected, tr.selected {
+      background: #dbeafe !important;
+      background-color: #dbeafe !important;
+    }
+
+    .table-cell-number {
+      width: 30px;
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+    }
+
+    .table-cell-checkbox {
+      width: 30px;
+      text-align: center;
+    }
+
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+
+    @media (max-width: 1200px) {
+      .table-header, .table-row {
+        padding: 10px 12px;
+      }
+    }
   </style>
 </head>
 
@@ -2486,6 +2544,24 @@
           this.setView('report');
         },
 
+        sortReport(colKey) {
+          if (this.reportSortColumn === colKey) {
+            this.reportSortAsc = !this.reportSortAsc;
+          } else {
+            this.reportSortColumn = colKey;
+            this.reportSortAsc = true;
+          }
+        },
+
+        refreshReport() {
+          this.showToast('Report data refreshed', 'info');
+        },
+
+        exportReport() {
+          const title = this.currentReport?.title || 'Report';
+          this.showToast('Exporting ' + title + ' to CSV...', 'success');
+        },
+
         get currentReport() {
           return this.reportConfigs[this.currentReportKey] || null;
         },
@@ -2493,9 +2569,22 @@
         get filteredReportRows() {
           if (!this.currentReport) return [];
           let rows = [...(this.currentReport.rows || [])];
-          if (this.reportSearchQuery.trim()) {
+          if (this.reportSearchQuery && this.reportSearchQuery.trim()) {
             const q = this.reportSearchQuery.toLowerCase();
             rows = rows.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
+          }
+          if (this.reportSortColumn) {
+            const col = this.reportSortColumn;
+            const asc = this.reportSortAsc;
+            rows.sort((a, b) => {
+              let valA = a[col] ?? '';
+              let valB = b[col] ?? '';
+              if (typeof valA === 'string') valA = valA.toLowerCase();
+              if (typeof valB === 'string') valB = valB.toLowerCase();
+              if (valA < valB) return asc ? -1 : 1;
+              if (valA > valB) return asc ? 1 : -1;
+              return 0;
+            });
           }
           return rows;
         },
